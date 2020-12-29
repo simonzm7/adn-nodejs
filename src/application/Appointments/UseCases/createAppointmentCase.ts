@@ -5,32 +5,29 @@ import { AppointmentDTO } from "src/domain/Appointments/Repository/DTO/Appointme
 import { AppointmentSelectorDTo } from "src/domain/Appointments/Repository/DTO/AppointmentSelectorDTO";
 import { AppointmentService } from "src/domain/Appointments/Services/AppointmentService";
 import { Appointments } from "src/infraestructure/Appointments/DBEntities/appointment.entity";
-import { UserException } from "src/infraestructure/Exceptions/Adapters/UserException";
 
 
 
 @Injectable()
-export class createAppointmentCase
-{
-    constructor(private readonly appointmentService : AppointmentService) {}
+export class createAppointmentCase {
+    constructor(private readonly appointmentService: AppointmentService) { }
 
-    ExecuteCreate = async (appointment : AppointmentDTO) => {
-        
-        await this.appointmentService.ExecuteCreate(new AppointmentModel(appointment, new UserException()));
+    ExecuteCreate = async (appointment: AppointmentDTO): Promise<{}> => {
+        return await this.appointmentService.ExecuteCreate(new AppointmentModel(appointment));
     }
 
-    ExecuteList = async () : Promise<Appointments[]> => {
+    ExecuteList = async (): Promise<Appointments[]> => {
         return await this.appointmentService.ExecuteList();
     }
 
-    ExecuteSelector = async (dto : AppointmentSelectorDTo) => {
-        await this.appointmentService.ExecuteSelector(new AppointmentSelectorModel(dto));
+    ExecuteSelector = async (dto: AppointmentSelectorDTo): Promise<{}> => {
+        return await this.appointmentService.ExecuteSelector(new AppointmentSelectorModel(dto));
     }
-    ExecuteCanceller = async (id : number, userId : number) => {
-        await this.appointmentService.ExecuteCanceller(id, userId);
+    ExecuteCanceller = async (id: number, userId: number): Promise<{}> => {
+        return await this.appointmentService.ExecuteCanceller(id, userId);
     }
-    
-    ExecuteDeletor = async (appointmentId : number,userId : number) => {
-        await this.appointmentService.ExecuteDeletor(appointmentId, userId);
+
+    ExecuteDeletor = async (appointmentId: number, userId: number) : Promise<{}> => {
+        return await this.appointmentService.ExecuteDeletor(appointmentId, userId);
     }
 }

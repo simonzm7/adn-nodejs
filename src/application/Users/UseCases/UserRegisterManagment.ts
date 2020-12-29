@@ -9,17 +9,14 @@ import { UserException } from 'src/infraestructure/Exceptions/Adapters/UserExcep
 export class UserRegisterManagment {
     constructor(private readonly userService : UserService) {}
 
-    public async Execute(user : UserDTO)
+    public async Execute(user : UserDTO) : Promise<{}>
     {
-        await this.userService.Execute(
-            new UserModel(
-                user,
-                new UserException()
-            )
+        return await this.userService.Execute(
+            new UserModel(user)
         ); 
     }
-    public async ExecuteBalance(balance : number, userId : number)
+    public async ExecuteBalance(balance : number, userId : number) : Promise<{}>
     {
-        await this.userService.ExecuteBalance(balance, userId);
+        return await this.userService.ExecuteBalance(balance, userId);
     }
 }

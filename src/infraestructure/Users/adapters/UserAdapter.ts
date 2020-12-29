@@ -1,23 +1,20 @@
-import { Injectable, HttpStatus } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { UserModel } from "src/domain/Users/models/UserModel";
 import { abstractUser } from "src/domain/Users/repositories/Users/abstractUser";
 import { DBRepository } from "src/domain/Users/repositories/DB/DBRepository";
 import { User } from "../EntityManager/user.entity";
-import ExceptionRepository from "src/domain/Exceptions/Repository/ExceptionRepository";
 
 @Injectable()
 export class UserAdapter implements abstractUser {
-    constructor(private readonly dbProvider : DBRepository,
-        private readonly exceptionRepository : ExceptionRepository){}
-    async createUser(user : UserModel){
-        await this.dbProvider.CreateOne(user);
+    constructor(private readonly dbProvider : DBRepository){}
+    async createUser(user : UserModel) : Promise<{}> {
+        return await this.dbProvider.CreateOne(user);
     }
 
-    async updateBalance(balance : number, user : User)
+    async updateBalance(balance : number, user : User) : Promise<{}>
     {
         user.balance = Number(user.balance) + Number(balance);
-        await this.dbProvider.UpdateBalance(user);
-        this.exceptionRepository.createException('Balance Actualizado', HttpStatus.OK);
+        return await this.dbProvider.UpdateBalance(user);
     }
 
     async findUserByIdAndReturn(userId : number) : Promise<User>

@@ -1,28 +1,27 @@
-import { HttpStatus } from "@nestjs/common";
-import ExceptionRepository from "src/domain/Exceptions/Repository/ExceptionRepository";
 import { AppointmentDTO } from "../Repository/DTO/AppointmentDTO";
 
 export class AppointmentModel {
 
     private readonly appointment: AppointmentDTO;
-    constructor(appointment: AppointmentDTO, private readonly userException: ExceptionRepository) {
-        
+    private readonly errors: string[];
+    constructor(appointment: AppointmentDTO) {
+
         this.appointment = appointment;
-        this.validFormat(this.appointment['appointmentDate']);
+        var Initialize: string[] = [];
+        Initialize.push(this.validFormat(this.appointment['appointmentDate']));
         this.appointment['appointmentDate'] = this.structureDate();
-        var Initialize: string[] = [
+        Initialize = [...Initialize,
             this.Check('idDoctor').IsNumber(),
             this.Check('appointmentDate').validDay(),
             this.Check('appointmentDate').validHours(this.appointment.IsFestive === true ? true : false),
-            this.Check('cost').IsLength({min: 0, max: 1000000}),
+            this.Check('cost').IsLength({ min: 0, max: 1000000 }),
+            
         ];
-        
         const errors: string[] = this.ValidInputs(Initialize);
-        if (errors.length > 0)
-            this.userException.createException(errors, HttpStatus.BAD_REQUEST);
-
-
-
+        this.errors = errors;
+    }
+    thereErrors(list: string[]) {
+        return Promise.reject({ message: list, statusCode: 400 });
     }
     structureDate() {
         const splited: string[] = this.appointment['appointmentDate'].split('/');
@@ -35,7 +34,9 @@ export class AppointmentModel {
     validFormat(format: string) {
         const dateRegex: RegExp = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-1]))(\/)\d{4}(\/)(?:2[0-3]|[01]?[0-9]):[0-5][0-9]:[0-5][0-9]$/
         if (!dateRegex.test(format))
-            this.userException.createException('Formato de fecha invalido', 400);
+        {
+            return 'Formato de fecha invalido';
+        }
     }
     ValidInputs(inputs: string[]): string[] {
         const errors: string[] = [];
@@ -58,7 +59,7 @@ export class AppointmentModel {
                     return 'No puedes crear citas en este horario';
             },
             IsNumber: () => {
-                const numberRegex : RegExp = /^[0-9]+$/;
+                const numberRegex: RegExp = /^[0-9]+$/;
                 if (!numberRegex.test(this.appointment[valueName]))
                     return `El ${valueName} debe ser solo numérico`;
             },
@@ -69,6 +70,9 @@ export class AppointmentModel {
                     return `El precio maximo del ${valueName} es ${conditions.max}`;
             }
         }
+    }
+    get getErrors(): string[] {
+        return this.errors;
     }
     get DateTime(): any {
         return this.appointment.appointmentDate;

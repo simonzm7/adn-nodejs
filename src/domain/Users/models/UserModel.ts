@@ -7,10 +7,11 @@ import { IMethods } from "../repositories/Validations/IMethods";
 export class UserModel {
 
     private readonly user: UserDTO;
-    constructor(user: UserDTO,
-        private readonly exceptionRepository: ExceptionRepository) {
+    private errors : string[];
+    constructor(user: UserDTO) {
 
         this.user = user;
+        this.errors = [];
         const initialize: string[] = [
             this.Check('email').IsEmail(),
             this.Check('password').IsLength({ min: 4, max: 30 }),
@@ -20,8 +21,7 @@ export class UserModel {
             this.Check('dni').IsLength({ min: 10, max: 10 }),
             this.Check('role').IsRole()
         ];
-        const errors = this.validateInput(initialize);
-        if (errors.length > 0)  this.exceptionRepository.createException(errors, HttpStatus.BAD_REQUEST);
+        this.errors = this.validateInput(initialize);
     }
     private validateInput = (config: string[]) => {
         const errors: string[] = [];
@@ -62,6 +62,9 @@ export class UserModel {
         
         }
         return validations;
+    }
+    get getErrors() : string[] {
+        return this.errors;
     }
     get get_email(): string {
         return this.user.email;

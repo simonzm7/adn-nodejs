@@ -3,43 +3,45 @@ import { AppointmentModel } from "src/domain/Appointments/Model/AppointmentModel
 import { AppointmentDBRepository } from "src/domain/Appointments/Repository/AppointmentDBRepository";
 import { AppointmentRepository } from "src/domain/Appointments/Repository/AppointmentRepository";
 import { ActionType } from "src/domain/Appointments/Repository/Enums/ActionType";
-import ExceptionRepository from "src/domain/Exceptions/Repository/ExceptionRepository";
 import { User } from "src/infraestructure/Users/EntityManager/user.entity";
 import { Appointments } from "../DBEntities/appointment.entity";
 
 @Injectable()
 export class AppointmentAdapter implements AppointmentRepository {
-    constructor(private readonly appoimentDBRepository: AppointmentDBRepository,
-        private readonly exceptionRepository: ExceptionRepository) { }
-    createAppointment = async (appointment: AppointmentModel) => {
-        await this.appoimentDBRepository.createAppointment(appointment);
+    constructor(private readonly appoimentDBRepository: AppointmentDBRepository) { }
+    createAppointment = async (appointment: AppointmentModel): Promise<{}> => {
+        return await this.appoimentDBRepository.createAppointment(appointment);
     }
     listAppointments = async (parameters: {}): Promise<Appointments[]> => {
         return await this.appoimentDBRepository.listAppointments(parameters);
     }
-    takeAppointment = async (appointment: Appointments, user: User) => {
+    takeAppointment = async (appointment: Appointments, user: User): Promise<{}> => {
         appointment.appointmentStatus = 1;
         appointment.idUser = user.userId;
-        await this.appoimentDBRepository.putAppointment(appointment, ActionType.Take, user);
+        return await this.appoimentDBRepository.putAppointment(appointment, ActionType.Take, user);
     }
 
-    cancelAppointment = async (appointment: Appointments, user: User) => {
-        if (appointment.appointmentStatus < 2) {
-            appointment.appointmentStatus = 2;
-            await this.appoimentDBRepository.putAppointment(appointment, ActionType.Cancel, user);
-        }
-        else
-            this.exceptionRepository.createException('Cita ya cancelada', HttpStatus.BAD_REQUEST);
+    cancelAppointment = async (appointment: Appointments, user: User): Promise<{}> => {
+        return new Promise((resolve, reject) => {
+            if (appointment.appointmentStatus < 2) {
+                appointment.appointmentStatus = 2;
+                resolve(this.appoimentDBRepository.putAppointment(appointment, ActionType.Cancel, user));
+            }
+            else
+               reject({message: 'Cita ya cancelada', statusCode: HttpStatus.BAD_REQUEST});
+        });
     }
-    cancelAppointmentWithoutUser = async (appointment: Appointments) => {
-        if (appointment.appointmentStatus < 2) {
-            appointment.appointmentStatus = 2;
-            await this.appoimentDBRepository.putAppointment(appointment, ActionType.Cancel, null)
-        }
-        else
-            this.exceptionRepository.createException('Cita ya cancelada', HttpStatus.BAD_REQUEST);
+    cancelAppointmentWithoutUser = async (appointment: Appointments): Promise<{}> => {
+        return new Promise(async (resolve, reject) => {
+            if (appointment.appointmentStatus < 2) {
+                appointment.appointmentStatus = 2;
+                resolve(this.appoimentDBRepository.putAppointment(appointment, ActionType.Cancel, null));
+            }
+            else
+                reject({ statusCode: HttpStatus.BAD_REQUEST, message: 'Cita ya cancelada' });
+        });
     }
-    deleteAppointment = async (appointmentId: number) => {
-        await this.appoimentDBRepository.findAppointmentByIdAndDelete(appointmentId);
+    deleteAppointment = async (appointmentId: number) : Promise<{}>=> {
+        return await this.appoimentDBRepository.findAppointmentByIdAndDelete(appointmentId);
     }
 }

@@ -2,9 +2,7 @@ import { HttpException, Injectable } from "@nestjs/common";
 import { AppointmentSelectorModel } from "src/domain/Appointments/Model/AppointmentSelectorModel";
 import { AppointmentDBRepository } from "src/domain/Appointments/Repository/AppointmentDBRepository";
 import { AppointmentValidationRepository } from "src/domain/Appointments/Repository/AppointmentValidationRepository";
-import { AppointmentSelectorDTo } from "src/domain/Appointments/Repository/DTO/AppointmentSelectorDTO";
 import { WeekDays } from "src/domain/Appointments/Repository/Enums/WeekDays";
-import ExceptionRepository from "src/domain/Exceptions/Repository/ExceptionRepository";
 import { DBRepository } from "src/domain/Users/repositories/DB/DBRepository";
 import { User } from "src/infraestructure/Users/EntityManager/user.entity";
 import { Double } from "typeorm";
@@ -28,8 +26,12 @@ export class AppointmentValidationAdapter implements AppointmentValidationReposi
     }
     VerifyRole = async (userId: number): Promise<boolean> => {
         const user: User = await this.dbRepository.findOneById(userId);
-        if (user.role.toLocaleLowerCase() === 'doctor')
-            return Promise.resolve(true);
+        if (user) {
+            if (user.role.toLocaleLowerCase() === 'doctor')
+                return Promise.resolve(true);
+            else
+                return Promise.resolve(false);
+        }
         else
             return Promise.resolve(false);
     }
@@ -70,16 +72,16 @@ export class AppointmentValidationAdapter implements AppointmentValidationReposi
         else
             return Promise.resolve(false);
     }
-    VerifyAppointmentByIdsAndReturn = async (idAppointment : number, userId  : number) : Promise<Appointments | boolean> => {
+    VerifyAppointmentByIdsAndReturn = async (idAppointment: number, userId: number): Promise<Appointments | boolean> => {
         const Appointment: Appointments = await this.appointmentDBRepository.findAppointmentByIds(idAppointment, userId);
-        if(Appointment) return Promise.resolve(Appointment);
+        if (Appointment) return Promise.resolve(Appointment);
         else
-        return Promise.resolve(false);
+            return Promise.resolve(false);
     }
-    VerifyAppointmentByIdAndReturn = async (idAppointment : number) : Promise<Appointments | boolean> => {
+    VerifyAppointmentByIdAndReturn = async (idAppointment: number): Promise<Appointments | boolean> => {
         const Appointment: Appointments = await this.appointmentDBRepository.findAppointmentById(idAppointment);
-        if(Appointment) return Promise.resolve(Appointment);
+        if (Appointment) return Promise.resolve(Appointment);
         else
-        return Promise.resolve(false);
+            return Promise.resolve(false);
     }
 }

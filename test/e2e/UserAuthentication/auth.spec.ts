@@ -72,8 +72,7 @@ describe('UserAuthenticationController', () => {
         const response = await request(app.getHttpServer())
         .post('/api/auth').send(user)
         .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body.message).toEqual('Contraseña Incorrecta');
+        expect(response.body.message).toEqual('Contraseña incorrecta');
     });
-    //¡¡¡ CREATE MORE UNIT TESTING ABOUT AUTH INPUT VALIDATIONS!!!
 
 })

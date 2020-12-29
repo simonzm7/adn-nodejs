@@ -1,6 +1,5 @@
 import { AppointmentModel } from "src/domain/Appointments/Model/AppointmentModel";
 import { AppointmentSelectorModel } from "src/domain/Appointments/Model/AppointmentSelectorModel";
-import { AppointmentValidationRepository } from "src/domain/Appointments/Repository/AppointmentValidationRepository";
 import { AppointmentDTO } from "src/domain/Appointments/Repository/DTO/AppointmentDTO";
 import { AppointmentSelectorDTo } from "src/domain/Appointments/Repository/DTO/AppointmentSelectorDTO";
 import { AppointmentService } from "src/domain/Appointments/Services/AppointmentService"
@@ -22,7 +21,7 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => new User()),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => new Appointments()),
-            }, new UserException(), null);
+            }, null);
         const appointmentDto: AppointmentDTO = {
             idDoctor: 1,
             doctorname: "Juan Zapata",
@@ -32,7 +31,7 @@ describe('Domain - Appointment Service', () => {
             IsFestive: false,
             idUser: null
         }
-        const appointment: AppointmentModel = new AppointmentModel(appointmentDto, new UserException());
+        const appointment: AppointmentModel = new AppointmentModel(appointmentDto);
         expect(_appointmentService.ExecuteCreate(appointment)).rejects.toThrow('Solo puedes crear una cita cada hora');
     });
 
@@ -46,17 +45,17 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => new User()),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => new Appointments()),
-            }, new UserException(), null);
+            }, null);
         const appointmentDto: AppointmentDTO = {
             idDoctor: 1,
-            doctorname: "Juan Zapata",
+            doctorname: "",
             appointmentDate: "25/11/2020/10:59:59",
-            cost: 80500,
+            cost: 0,
             status: 0,
             IsFestive: false,
             idUser: null
         }
-        const appointment: AppointmentModel = new AppointmentModel(appointmentDto, new UserException());
+        const appointment: AppointmentModel = new AppointmentModel(appointmentDto);
         expect(_appointmentService.ExecuteCreate(appointment)).rejects.toThrow('No puedes crear una cita');
     });
 
@@ -64,13 +63,13 @@ describe('Domain - Appointment Service', () => {
         const appoitmentsList: Appointments[] = [{ idAppointment: 1, idDoctor: 1, doctorname: "Juan Zapata", appointmentdate: "2020-12-28 07:00:00.000", costappointment: 80500, appointmentStatus: 0, IsFestive: 'false', idUser: null }];
         const _appointmentService = new AppointmentService(
             {
-                createAppointment: jest.fn((appointment: AppointmentModel) => { }),
+                createAppointment: jest.fn(async (appointment: AppointmentModel) => Promise.resolve({})),
                 listAppointments: jest.fn((async (parameters: {}) => appoitmentsList)),
-                takeAppointment: jest.fn((appointment: Appointments, user: User) => { }),
-                cancelAppointment: jest.fn((appointment: Appointments, user: User) => { }),
-                cancelAppointmentWithoutUser: jest.fn((appointment: Appointments) => { }),
-                deleteAppointment: jest.fn((appointmentId: number) => { })
-            }, null, new UserException(), null);
+                takeAppointment: jest.fn(async (appointment: Appointments, user: User) => Promise.resolve({})),
+                cancelAppointment: jest.fn(async(appointment: Appointments, user: User) => Promise.resolve({})),
+                cancelAppointmentWithoutUser: jest.fn(async(appointment: Appointments) => Promise.resolve({})),
+                deleteAppointment: jest.fn(async(appointmentId: number) => Promise.resolve({}))
+            }, null, null);
         expect(await _appointmentService.ExecuteList()).toEqual(appoitmentsList);
     });
 
@@ -85,7 +84,7 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => new User()),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => new Appointments()),
-            }, new UserException(), null);
+            }, null);
         const appointmentDto: AppointmentSelectorDTo = {
             AppointmentId: 1,
             week: '25/11/2020/10:59:59',
@@ -106,7 +105,7 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => null),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => new Appointments()),
-            }, new UserException(), null);
+            }, null);
         const appointmentDto: AppointmentSelectorDTo = {
             AppointmentId: 1,
             week: '25/11/2020/10:59:59',
@@ -120,13 +119,13 @@ describe('Domain - Appointment Service', () => {
         const appointment: Appointments = { idAppointment: 1, idDoctor: 1, doctorname: "Juan Zapata", appointmentdate: "2020-12-28 07:00:00.000", costappointment: 80500, appointmentStatus: 0, IsFestive: 'false', idUser: null }
         const user: User = {
             userId: 1,
-            email: "asd1@asd1.com",
-            password: "12345",
-            firstname: "juan",
-            lastname: "zapata",
-            dni: "1234567890",
-            balance: 1000000,
-            role: "Customer"
+            email: "",
+            password: "",
+            firstname: "",
+            lastname: "",
+            dni: "",
+            balance: 0,
+            role: ""
 
         }
         const _appointmentService: AppointmentService = new AppointmentService(null,
@@ -138,7 +137,7 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => user),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => new Appointments()),
-            }, new UserException(), null);
+            }, null);
         const appointmentDto: AppointmentSelectorDTo = {
             AppointmentId: 1,
             week: '25/11/2020/10:59:59',
@@ -160,12 +159,12 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => new User()),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => true),
-            }, new UserException(), {
+            }, {
                 findOneByEmailAndDni: jest.fn(async (email : string, dni : string) => new User()),
                 findOneByEmail: jest.fn(async (email : string) => new User()),
                 findOneById: jest.fn(async (id : number) => null),
-                CreateOne: jest.fn((user : UserModel) =>{}),
-                UpdateBalance: jest.fn((user : User) => {}),
+                CreateOne: jest.fn(async (user : UserModel) =>Promise.resolve({})),
+                UpdateBalance: jest.fn(async (user : User) => Promise.resolve({})),
             });
 
         expect(_appointmentService.ExecuteCanceller(1,1)).rejects.toThrow('Usuario no existente');
@@ -181,7 +180,7 @@ describe('Domain - Appointment Service', () => {
                 VerifyIfCustomerHaveBalance: jest.fn(async (userId: number, appointmentCost) => new User()),
                 VerifyAppointmentByIdsAndReturn: jest.fn(async (appointmentId: number, userId: number) => new Appointments()),
                 VerifyAppointmentByIdAndReturn: jest.fn(async (appointmentId: number) => true),
-            }, new UserException(),null);
+            },null);
 
         expect(_appointmentService.ExecuteDeletor(1, 1)).rejects.toThrow('No puedes eliminar una cita');
     });

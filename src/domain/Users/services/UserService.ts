@@ -1,4 +1,5 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
+import { rejects } from 'assert';
 import { timeStamp } from 'console';
 import ExceptionRepository from 'src/domain/Exceptions/Repository/ExceptionRepository';
 import { User } from 'src/infraestructure/Users/EntityManager/user.entity';
@@ -14,24 +15,33 @@ export class UserService {
     private readonly userValidations: ValidationsRepository,
     private readonly execeptionRepository: ExceptionRepository) { }
 
-  public async Execute(user: UserModel) {
+  public async Execute(user: UserModel): Promise<{}> {
 
-    if (!(await this.userValidations.UserAlreadyExists(user.get_email, user.get_dni)))
-      await this.userRepository.createUser(user);
+    return new Promise(async (resolve, reject) => {
+      if (user.getErrors.length > 0)
+        reject({ message: user.getErrors, statusCode: HttpStatus.BAD_REQUEST });
+      else {
+        if (!(await this.userValidations.UserAlreadyExists(user.get_email, user.get_dni)))
+          resolve(this.userRepository.createUser(user));
 
-    this.execeptionRepository.createException('User Already Exists', HttpStatus.BAD_REQUEST);
+        reject({ message: 'User Already Exists', statusCode: HttpStatus.BAD_REQUEST });
+      }
+    });
   }
 
-  public async ExecuteBalance(balance: number, userId) {
-    const user: User = await this.userRepository.findUserByIdAndReturn(userId);
-    if (!user)
-      this.execeptionRepository.createException('El usuario no existe', HttpStatus.BAD_REQUEST);
-
-    const balanceError: number = this.userValidations.VerifyBalancaCapacity(Number(balance), Number(user.balance));
-    if (balanceError >= 0)
-      this.execeptionRepository.createException(`Solo puede ingresar el balance de : ${balanceError}`, HttpStatus.BAD_REQUEST);
-
-    await this.userRepository.updateBalance(balance, user);
+  public async ExecuteBalance(balance: number, userId): Promise<{}> {
+    return new Promise(async (resolve, reject) => {
+      const user: User = await this.userRepository.findUserByIdAndReturn(userId);
+      if (!user)
+        reject({ message: 'El usuario no existe', statusCode: HttpStatus.BAD_REQUEST });
+      else {
+        const balanceError: number = this.userValidations.VerifyBalancaCapacity(Number(balance), Number(user.balance));
+        if (balanceError >= 0)
+          reject({ message: `Solo puede ingresar el balance de : ${balanceError}`, statusCode: HttpStatus.BAD_REQUEST });
+        else
+          resolve(this.userRepository.updateBalance(balance, user));
+      }
+    });
 
   }
 }

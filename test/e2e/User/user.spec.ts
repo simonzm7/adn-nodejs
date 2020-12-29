@@ -168,8 +168,7 @@ describe('UserController', () => {
         const response = await request(app.getHttpServer())
         .post('/api/user').send(user)
         .expect(HttpStatus.BAD_REQUEST);
-
-        expect(response.body).toEqual(['Invalid user role']);
+        expect(response.body).toEqual(["Invalid user role"]);
     });
 
     //Update Balance

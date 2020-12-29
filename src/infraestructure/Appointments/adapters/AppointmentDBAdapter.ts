@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
+import { HttpStatus, Injectable } from "@nestjs/common";
 import { AppointmentModel } from "src/domain/Appointments/Model/AppointmentModel";
 import { AppointmentDBRepository } from "src/domain/Appointments/Repository/AppointmentDBRepository";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -8,27 +8,26 @@ import { ActionType } from "src/domain/Appointments/Repository/Enums/ActionType"
 import { DBRepository } from "src/domain/Users/repositories/DB/DBRepository";
 import { User } from "src/infraestructure/Users/EntityManager/user.entity";
 import { getConnection } from "typeorm";
-import ExceptionRepository from "src/domain/Exceptions/Repository/ExceptionRepository";
 
 @Injectable()
 export class AppointmentDBAdapter implements AppointmentDBRepository {
     constructor(@InjectRepository(Appointments) private readonly appointmentEntity: Repository<Appointments>,
-        private readonly userRepository: DBRepository,
-        private readonly exceptionRepository: ExceptionRepository) { }
-        
-    createAppointment = async (appointment: AppointmentModel) => {
-        const response = await this.appointmentEntity.save({
-            idDoctor: appointment.getDoctorId,
-            doctorname: appointment.doctorname,
-            appointmentdate: appointment.appointmentDate,
-            costappointment: appointment.cost,
-            appointmentStatus: 0,
-            IsFestive: `${appointment.IsFestive}`,
-            idUser: null
-        })
-            .then(() => { return { code: HttpStatus.OK, message: 'Cita creada correctamente' }; })
-            .catch((err) => { return { code: HttpStatus.BAD_REQUEST, message: err }; })
-        this.exceptionRepository.createException(response.message, response.code);
+        private readonly userRepository: DBRepository) { }
+
+    createAppointment = async (appointment: AppointmentModel): Promise<{}> => {
+        return new Promise(async (resolve, reject) => {
+            await this.appointmentEntity.save({
+                idDoctor: appointment.getDoctorId,
+                doctorname: appointment.doctorname,
+                appointmentdate: appointment.appointmentDate,
+                costappointment: appointment.cost,
+                appointmentStatus: 0,
+                IsFestive: `${appointment.IsFestive}`,
+                idUser: null
+            })
+                .then(() => resolve({ statusCode: HttpStatus.OK, message: 'Cita creada correctamente' }))
+                .catch(() => reject({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error al crear la cita' }))
+        });
     }
     listAppointments = async (): Promise<Appointments[]> => {
         const result = await this.appointmentEntity.find({ idUser: null });
@@ -45,29 +44,33 @@ export class AppointmentDBAdapter implements AppointmentDBRepository {
     findAppointmentById = async (idAppointment: number): Promise<Appointments> => {
         return await this.appointmentEntity.findOne({ idAppointment });
     }
-    findAppointmentByIdAndDelete = async (idAppointment: number) => {
-        const verify = await this.appointmentEntity.findOne({ idAppointment });
-        if (verify) {
-            const response = await getConnection().createQueryBuilder()
-                .delete()
-                .from(Appointments)
-                .where('idAppointment = :idAppointment', { idAppointment })
-                .execute()
-                .then(() => { return { code: HttpStatus.OK, message: 'Cita eliminada correctamente' } })
-                .catch(() => { return { code: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error al eliminar la cita' } });
-            this.exceptionRepository.createException(response.message, response.code);
-        }
-        this.exceptionRepository.createException('Cita no existente', HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-    putAppointment = async (appointment: Appointments, actionType: ActionType, user: User) => {
-        await this.appointmentEntity.save(appointment)
-            .then(async () => {
-                if (user && actionType === ActionType.Take) user.balance = user.balance - appointment.costappointment;
-                if (user && actionType === ActionType.Cancel) user.balance = Number(user.balance) + Number(appointment.costappointment); 
-                if (user) await this.userRepository.UpdateBalance(user);
+    findAppointmentByIdAndDelete = async (idAppointment: number) : Promise<{}>=> {
+        return new Promise(async (resolve, reject) => {
+            const verify = await this.appointmentEntity.findOne({ idAppointment });
+            if (verify) {
+                await getConnection().createQueryBuilder()
+                    .delete()
+                    .from(Appointments)
+                    .where('idAppointment = :idAppointment', { idAppointment })
+                    .execute()
+                    .then(() => resolve({statusCode: HttpStatus.OK, message: 'Cita eliminada correctamente' }))
+                    .catch(() => reject({ statusCode: HttpStatus.INTERNAL_SERVER_ERROR, message: 'Error al eliminar la cita' }));
 
-            }).catch((err) => {
-                this.exceptionRepository.createException(`Error al modificar la cita`, HttpStatus.BAD_REQUEST);
-            })
+            }
+            reject({message: 'Cita no existente', statusCode: HttpStatus.BAD_REQUEST});
+        });
+    }
+    putAppointment = async (appointment: Appointments, actionType: ActionType, user: User) : Promise<{}> => {
+        return new Promise((resolve, reject) => {
+            this.appointmentEntity.save(appointment)
+                .then(async () => {
+                    if (user && actionType === ActionType.Take) user.balance = user.balance - appointment.costappointment;
+                    if (user && actionType === ActionType.Cancel) user.balance = Number(user.balance) + Number(appointment.costappointment);
+                    if (user) await this.userRepository.UpdateBalance(user);
+                    resolve({ message: `Cita ${actionType} correctamente`, statusCode: HttpStatus.OK });
+                }).catch(() => {
+                    reject({ message: 'Error al modificar la cita', statusCode: HttpStatus.BAD_REQUEST });
+                });
+        });
     }
 }

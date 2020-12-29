@@ -29,8 +29,8 @@ describe('Domain - UserService', () => {
 
     it('It should be fail if the user in balance already exists', async () => {
         const _userService = new UserService({
-            createUser: jest.fn((user : UserModel) => {}),
-            updateBalance: jest.fn((balance : number, user : User) => {}),
+            createUser: jest.fn(async (user : UserModel) => Promise.resolve({})),
+            updateBalance: jest.fn(async (balance : number, user : User) => Promise.resolve({})),
             findUserByIdAndReturn: jest.fn(async (userId : number) => null)
         }, {
             UserAlreadyExists: jest.fn(async (email, dni) => email == 'asd@asd.com' && dni == '1234567890'),
@@ -44,8 +44,8 @@ describe('Domain - UserService', () => {
 
     it('It should be fail if the user  balance exceds limit', async () => {
         const _userService = new UserService({
-            createUser: jest.fn((user : UserModel) => {}),
-            updateBalance: jest.fn((balance : number, user : User) => {}),
+            createUser: jest.fn(async (user : UserModel) => Promise.resolve({})),
+            updateBalance: jest.fn(async (balance : number, user : User) => Promise.resolve({})),
             findUserByIdAndReturn: jest.fn(async (userId : number) => new User())
         }, {
             UserAlreadyExists: jest.fn(async (email, dni) => email == 'asd@asd.com' && dni == '1234567890'),

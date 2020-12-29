@@ -13,13 +13,17 @@ export default class UserAuthenticationService {
         private readonly exceptionRepository: ExceptionRepository,
         private readonly authValidationRepository: AuthValidationRepository
     ) { }
-    ExecuteLogin = async (credentials: UserAuthModel) => {
-        const userEntity: User = await this.validationRepository.UserAlreadyExistsAndReturn(credentials.getEmail);
-        if (userEntity) {
-            if (this.authValidationRepository.validation(credentials, userEntity.password))
-                  this.loginRepository.LoginUser(userEntity.userId);
-            this.exceptionRepository.createException('Contraseña Incorrecta', HttpStatus.BAD_REQUEST);
-        }
-        this.exceptionRepository.createException('El usuario no existe', HttpStatus.BAD_REQUEST);
+    ExecuteLogin = async (credentials: UserAuthModel): Promise<{}> => {
+        return new Promise(async (resolve, reject) => {
+            const userEntity: User = await this.validationRepository.UserAlreadyExistsAndReturn(credentials.getEmail);
+            if (userEntity) {
+                if (this.authValidationRepository.validation(credentials, userEntity.password))
+                   resolve(this.loginRepository.LoginUser(userEntity.userId));
+                else
+                reject({message: 'Contraseña incorrecta', statusCode: HttpStatus.BAD_REQUEST});
+            }
+            else
+                reject({message: 'El usuario no existe', statusCode: HttpStatus.BAD_REQUEST});
+        })
     }
 }

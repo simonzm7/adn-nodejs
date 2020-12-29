@@ -41,7 +41,7 @@ describe('AppointmentController', () => {
     afterEach(() => sinonSandbox.restore());
     afterAll(async () => await app.close());
     const commonHeader = {
-        userid: 2
+        userid: 1
     }
     it('It should get appointments list', async () => {
         const appoitmentsList: Appointments[] = [{ idAppointment: 1, idDoctor: 1, doctorname: "Juan Zapata", appointmentdate: "2020-12-28 07:00:00.000", costappointment: 80500, appointmentStatus: 0, IsFestive: 'false', idUser: null }];
@@ -94,22 +94,21 @@ describe('AppointmentController', () => {
         expect(response.body.message).toEqual('No puedes crear una cita');
     });
     it('It should be fail if the appointment Date not is specific format', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
-        const appointment: AppointmentDTO = {
+      
+        const appointment: any = {
             idDoctor: 1,
             doctorname: 'Juan Zapata',
             appointmentDate: '000/29/11/2020/8:00:00',
             cost: 80500,
             status: 0,
-            IsFestive: false,
-            idUser: null
+            IsFestive: false
         }
         const response : request.Response= await request(app.getHttpServer())
-            .post('/api/appointments').set(commonHeader)
+            .post('/api/appointments')
+            .set(commonHeader)
             .send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body.message).toEqual("Formato de fecha invalido");
+        expect(response.body).toEqual(["Formato de fecha invalido"]);
     });
 
     it('It should be fail if the cost not is numeric only', async () => {
@@ -238,16 +237,15 @@ describe('AppointmentController', () => {
     });
 
     it('It should be fail if the appointment not is available', async () => {
-        appointmentValidationRepository.VerifyAppointmentStatus.returns(Promise.resolve(false));
+        appointmentValidationRepository.VerifyAppointmentStatus.returns(Promise.resolve(null));
         const selectAppointment: any = {
             AppointmentId: 1,
             week: '28/11/2020/7:00:00',
         }
         const response : request.Response= await request(app.getHttpServer())
-            .put('/api/appointments').set(commonHeader).send(selectAppointment)
+            .put('/api/appointments').set({userId: 1}).send(selectAppointment)
             .expect(HttpStatus.BAD_REQUEST);
-            expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST, message: 'La cita no se encuentra disponible' });
-            
+            expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST});
     });
 
     it("It should be fail if the Customer don't have balance", async () => {
@@ -338,7 +336,7 @@ describe('AppointmentController', () => {
             .put('/api/appointments/1')
             .set(commonHeader)
             .expect(HttpStatus.BAD_REQUEST);
-            expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST, message: 'Usuario no existente' });
+            expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST, message: 'El usuario no existe' });
     });
 
     it("It should be fail if the user do not is a Doctor", async () => {
@@ -348,7 +346,7 @@ describe('AppointmentController', () => {
             .delete('/api/appointments/1')
             .set(commonHeader)
             .expect(HttpStatus.UNAUTHORIZED);
-            expect(response.body).toEqual({ statusCode: HttpStatus.UNAUTHORIZED, message: 'No puedes eliminar una cita' });
+            expect(response.body).toEqual({ statusCode: HttpStatus.UNAUTHORIZED, message: 'No puedes cancelar una cita' });
     });
 });
 
