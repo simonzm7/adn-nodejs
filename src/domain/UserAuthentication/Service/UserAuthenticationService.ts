@@ -10,7 +10,6 @@ import { LoginRepository } from "../Repository/LoginRepository";
 export default class UserAuthenticationService {
     constructor(private readonly loginRepository: LoginRepository,
         private readonly validationRepository: ValidationsRepository,
-        private readonly exceptionRepository: ExceptionRepository,
         private readonly authValidationRepository: AuthValidationRepository
     ) { }
     ExecuteLogin = async (credentials: UserAuthModel): Promise<{}> => {

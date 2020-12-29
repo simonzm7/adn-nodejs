@@ -7,12 +7,11 @@ import { IMethods } from "../repositories/Validations/IMethods";
 export class UserModel {
 
     private readonly user: UserDTO;
-    private errors : string[];
+    private readonly errors: string[];
     constructor(user: UserDTO) {
 
         this.user = user;
-        this.errors = [];
-        const initialize: string[] = [
+        const Initialize: string[] = [
             this.Check('email').IsEmail(),
             this.Check('password').IsLength({ min: 4, max: 30 }),
             this.Check('firstname').IsString(),
@@ -21,9 +20,10 @@ export class UserModel {
             this.Check('dni').IsLength({ min: 10, max: 10 }),
             this.Check('role').IsRole()
         ];
-        this.errors = this.validateInput(initialize);
+        const errors: string[] = this.ValidInputs(Initialize);
+        this.errors = errors;
     }
-    private validateInput = (config: string[]) => {
+    private ValidInputs = (config: string[]) => {
         const errors: string[] = [];
         config.forEach(v => {
             if (v) errors.push(v);

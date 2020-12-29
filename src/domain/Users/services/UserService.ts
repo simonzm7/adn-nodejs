@@ -1,7 +1,4 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
-import { rejects } from 'assert';
-import { timeStamp } from 'console';
-import ExceptionRepository from 'src/domain/Exceptions/Repository/ExceptionRepository';
 import { User } from 'src/infraestructure/Users/EntityManager/user.entity';
 import { UserModel } from '../models/UserModel';
 import { abstractUser } from '../repositories/Users/abstractUser';
@@ -12,8 +9,7 @@ import { ValidationsRepository } from '../repositories/Validations/ValidationsRe
 export class UserService {
   constructor(
     private readonly userRepository: abstractUser,
-    private readonly userValidations: ValidationsRepository,
-    private readonly execeptionRepository: ExceptionRepository) { }
+    private readonly userValidations: ValidationsRepository) { }
 
   public async Execute(user: UserModel): Promise<{}> {
 

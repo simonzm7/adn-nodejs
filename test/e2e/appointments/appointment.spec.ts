@@ -245,7 +245,7 @@ describe('AppointmentController', () => {
         const response : request.Response= await request(app.getHttpServer())
             .put('/api/appointments').set({userId: 1}).send(selectAppointment)
             .expect(HttpStatus.BAD_REQUEST);
-            expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST});
+            expect(response.body.message).toEqual('La cita no se encuentra disponible');
     });
 
     it("It should be fail if the Customer don't have balance", async () => {

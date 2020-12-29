@@ -50,7 +50,7 @@ export class AppointmentService {
                 }
                 else reject({ message: 'No tienes saldo disponible', statusCode: HttpStatus.BAD_REQUEST });
             }
-            else reject({ mesage: 'La cita no se encuentra disponible', statusCode: HttpStatus.BAD_REQUEST });
+            else reject({ message: 'La cita no se encuentra disponible', statusCode: HttpStatus.BAD_REQUEST });
         });
     }
 
