@@ -1,64 +1,72 @@
-import { HttpStatus } from "@nestjs/common";
-import { response } from "express";
-import { UserModel } from "src/domain/Users/models/UserModel";
-import { UserDTO } from "src/domain/Users/repositories/Users/DTO/UserDTO";
-import { UserService } from "src/domain/Users/services/UserService";
+import UserAuthModel from "src/domain/UserActions/UserAuthentication/Model/UserAuthModel";
+import { UserModel } from "src/domain/UserActions/Users/models/UserModel";
+import { UserDTO } from "src/domain/UserActions/Users/repositories/Users/DTO/UserDTO";
+import { UserService } from "src/domain/UserActions/Users/services/UserService";
+import { BalanceService } from "src/domain/UserActions/Users/services/BalanceService";
 import { User } from "src/infraestructure/Users/EntityManager/user.entity";
+import { BussinessExcp } from "src/domain/Exceptions/BussinessExcp";
 
 
 describe('Domain - UserService', () => {
     it("It should be fail if when i'm creating user, the user already exists", async () => {
-        const _userService = new UserService(null, {
-            UserAlreadyExists: jest.fn(async (email, dni) => true),
-            UserAlreadyExistsAndReturn: jest.fn(async (email) => new User()),
-            VerifyBalancaCapacity: jest.fn((balance: number, userBalance: number) => 0)
-        });
-        const user: UserDTO = {
-            email: "asd@asd.com",
-            password: "12345",
-            firstname: "juan",
-            lastname: "zapata",
-            dni: "1234567890",
-            role: "Customer"
+        try {
+            const _userService = new UserService(null, {
+                userAlreadyExists: jest.fn(async (email, dni) => { throw new BussinessExcp({ code: 'user_already_exists' }) }),
+                userAlreadyExistsAndReturn: jest.fn(async (email) => Promise.resolve(new User())),
+                userHaveBalance: jest.fn(async (balance: number, userBalance: number) => { }),
+                validationPassword: jest.fn((credentials: UserAuthModel, password: string) => { })
+            });
+            const user: UserDTO = {
+                email: "asd@asd.com",
+                password: "12345",
+                firstname: "juan",
+                lastname: "zapata",
+                dni: "1234567890",
+                role: "Customer"
+            }
+
+            await _userService.executeCreate(new UserModel(user));
+        } catch (e) {
+            expect(e.response.message.code).toBe('user_already_exists');
         }
 
-        const result = _userService.Execute(new UserModel(user)).catch((err) => err.message);
-
-        await expect(await result).toEqual('User Already Exists');
     });
 
 
     //ExecuteBalance
 
     it("It should be fail if the user in balance don't exists", async () => {
-        const _userService = new UserService({
-            createUser: jest.fn(async (user: UserModel) => Promise.resolve({})),
-            updateBalance: jest.fn(async (balance: number, user: User) => Promise.resolve({})),
-            findUserByIdAndReturn: jest.fn(async (userId: number) => null)
-        }, {
-            UserAlreadyExists: jest.fn(async (email, dni) => email == 'asd@asd.com' && dni == '1234567890'),
-            UserAlreadyExistsAndReturn: jest.fn(async (email) => new User()),
-            VerifyBalancaCapacity: jest.fn((balance: number, userBalance: number) => 0)
-        });
-
-        const message = _userService.ExecuteBalance(1, 1).catch((err) => err.message)
-        expect(await message)
-            .toEqual("El usuario no existe");
+        try {
+            const _userService = new BalanceService({
+                createUser: jest.fn(async (user: UserModel) => Promise.resolve({})),
+                updateBalance: jest.fn(async (balance: number, user: User) => Promise.resolve({}))
+            }, {
+                userAlreadyExists: jest.fn(async (email: string, dni: string) => { }),
+                userAlreadyExistsAndReturn: jest.fn(async (email) => { throw new BussinessExcp({ code: 'email_not_found' })  }),
+                userHaveBalance: jest.fn(async (balance: number, userBalance: number) => {}),
+                validationPassword: jest.fn((credentials: UserAuthModel, password: string) => { }),
+            });
+            await _userService.executeBalance(1, 1);
+        } catch (e) {
+            expect(e.response.message.code).toBe('email_not_found');
+        }
     });
 
-
+    // Put balance
     it('It should be fail if the user  balance exceds limit', async () => {
-        const _userService = new UserService({
-            createUser: jest.fn(async (user: UserModel) => Promise.resolve({})),
-            updateBalance: jest.fn(async (balance: number, user: User) => Promise.resolve({})),
-            findUserByIdAndReturn: jest.fn(async (userId: number) => new User())
-        }, {
-            UserAlreadyExists: jest.fn(async (email, dni) => email == 'asd@asd.com' && dni == '1234567890'),
-            UserAlreadyExistsAndReturn: jest.fn(async (email) => new User()),
-            VerifyBalancaCapacity: jest.fn((balance: number, userBalance: number) => 0)
-        });
-        const response = _userService.ExecuteBalance(1, 1).catch((err) => err.message);
-
-         expect(await response).toEqual('Solo puede ingresar el balance de : 0');
+        try {
+            const _userService = new BalanceService({
+                createUser: jest.fn(async (user: UserModel) => Promise.resolve({})),
+                updateBalance: jest.fn(async (balance: number, user: User) => Promise.resolve({}))
+            }, {
+                userAlreadyExists: jest.fn(async (email, dni) => { }),
+                userAlreadyExistsAndReturn: jest.fn(async (email) => new User()),
+                userHaveBalance: jest.fn((balance: number, userBalance: number) => { throw new BussinessExcp({code: 'invalid_balance'}) }),
+                validationPassword: jest.fn((credentials: UserAuthModel, password: string) => { })
+            });
+            await _userService.executeBalance(1, 1)
+        } catch (e) {
+            expect(e.response.message.code).toBe('invalid_balance');
+        }
     });
 });

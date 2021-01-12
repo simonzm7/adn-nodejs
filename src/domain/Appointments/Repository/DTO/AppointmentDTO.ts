@@ -1,21 +1,17 @@
 import { IsString, IsNumber, IsBoolean } from 'class-validator';
 export class AppointmentDTO {
 
-    idDoctor : number;
+    
+    idDoctor: number;
 
     @IsString()
-    doctorname : string;
+    doctorname: string;
 
-    appointmentDate : any;
-
-    @IsNumber()
-    cost : number;
+    @IsString()
+    appointmentDate: string;
 
     @IsNumber()
-    status : number;
+    cost: number;
 
-    @IsBoolean()
-    IsFestive : boolean;
-
-    idUser : number;
+    idUser: number;
 }

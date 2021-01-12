@@ -1,23 +1,20 @@
 import { Module } from '@nestjs/common';
 import { UserRegisterManagment } from 'src/application/Users/UseCases/UserRegisterManagment';
-import { UserService } from 'src/domain/Users/services/UserService';
+import { UserService } from 'src/domain/UserActions/Users/services/UserService';
 import { UserController } from './controllers/user.controller';
-import { MergeProvider, MergeValidations, MergeDB } from './MergedProviders/MergeProvider';
+import { MergeProvider, MergeDB, MergeValidations } from './MergedProviders/MergeProvider';
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from './EntityManager/user.entity';
-import { ExceptionModel } from '../Exceptions/exceptions.model';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthGuard } from '../Appointments/adapters/Guard/AuthGuard';
+import { BalanceService } from 'src/domain/UserActions/Users/services/BalanceService';
+import { PaymentsModule } from '../Payments/payments.module';
+import { UserBussinessLogic } from 'src/domain/UserActions/Users/Validations/UserBussinessLogic';
 
 
 
 @Module({
-    imports: [TypeOrmModule.forFeature([User]), ExceptionModel],
-    providers: [UserRegisterManagment, UserService,MergeProvider, MergeValidations, MergeDB, {
-        provide: APP_GUARD,
-        useClass: AuthGuard
-    }],
+    imports: [TypeOrmModule.forFeature([User]), PaymentsModule],
+    providers: [UserRegisterManagment, UserService, BalanceService, UserBussinessLogic,MergeProvider, MergeDB, MergeValidations],
     controllers: [UserController],
-    exports: [MergeValidations, MergeDB]
+    exports: [MergeDB, MergeProvider, MergeValidations]
 })
 export class UserModule {}

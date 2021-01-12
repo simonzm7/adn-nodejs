@@ -1,5 +1,8 @@
 export enum ActionType
 {
-    Take = 'tomada',
-    Cancel = 'cancelada'
+    Take = 'taken',
+    Cancel = 'cancelled',
+    CancelAndReturn = 'cancelledAndReturn',
+    Select = 'select',
+    Create = 'create'
 }

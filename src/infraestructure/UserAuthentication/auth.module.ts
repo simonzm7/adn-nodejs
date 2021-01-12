@@ -1,16 +1,16 @@
 import { Module } from "@nestjs/common";
-import CreateExceptionCase from "src/application/Exception/CreateExceptionCase";
-import UserLoginManagement from "src/application/UserAuthentication/UsesCases/UserLoginManagement";
-import UserAuthenticationService from "src/domain/UserAuthentication/Service/UserAuthenticationService";
-import { ExceptionModel } from "../Exceptions/exceptions.model";
+import { QueryUser } from "src/application/UserAuthentication/UsesCases/Query/QueryUser";
+import UserLoginManagement from "src/application/UserAuthentication/UsesCases/Command/UserLoginManagement";
+import UserAuthenticationService from "src/domain/UserActions/UserAuthentication/Service/UserAuthenticationService";
 import { UserModule } from "../Users/user.module";
 import UserAuthenticationController from "./Controllers/auth.controller";
-import { MergeRepository, MergeExceptionRepository, MergeValidations } from "./MergeProviders/MergeProviders";
+import { MergeRepository, MergeValidations, mergeQuery } from "./MergeProviders/MergeProviders";
 
 
 @Module({
-    imports: [UserModule, ExceptionModel],
+    imports: [UserModule],
     controllers: [UserAuthenticationController],
-    providers: [UserLoginManagement, UserAuthenticationService, MergeRepository, MergeExceptionRepository, MergeValidations]
+    providers: [UserLoginManagement, UserAuthenticationService,
+        QueryUser,MergeRepository, MergeValidations, mergeQuery]
 })
 export default class UserAuthenticationModule {}

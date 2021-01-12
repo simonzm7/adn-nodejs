@@ -4,19 +4,15 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import UserAuthenticationModule from './UserAuthentication/auth.module';
 import { AppointmentModule } from './Appointments/appointment.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { dbConfiguration } from './Configuration/Database/config';
+import { PaymentsModule } from './Payments/payments.module';
+import { TrmModule } from './TRM/trm.module';
+import { AppLogger } from './Configuration/Logger/AppLogger';
 @Module({
-    imports:[AppointmentModule,UserModule,UserAuthenticationModule, 
+    imports:[AppLogger,UserModule,UserAuthenticationModule,AppointmentModule, PaymentsModule, TrmModule,
       TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (configService : ConfigService) => ({
-          type: 'mysql',
-          host: configService.get<string>('DB_HOST'),
-          port: 3306,
-          username: configService.get<string>('DB_USERNAME'),
-          password: configService.get<string>('DB_PASSWORD'),
-          database: configService.get<string>('DB_DATABASE'),
-          entities: ["dist/**/*.entity{.ts,.js}"],
-      }),
+      useFactory: dbConfiguration,
       inject: [ConfigService]
     }), ConfigModule.forRoot({
         isGlobal: true

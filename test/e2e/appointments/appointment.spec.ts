@@ -6,33 +6,66 @@ import { Appointments } from 'src/infraestructure/Appointments/DBEntities/appoin
 import { HttpStatus, INestApplication } from "@nestjs/common";
 import { AppointmentRepository } from "src/domain/Appointments/Repository/AppointmentRepository";
 import { AppointmentController } from "src/infraestructure/Appointments/controllers/appointment.controller";
-import { createAppointmentCase } from "src/application/Appointments/UseCases/createAppointmentCase";
-import { AppointmentService } from 'src/domain/Appointments/Services/AppointmentService';
-import { AppointmentValidationRepository } from 'src/domain/Appointments/Repository/AppointmentValidationRepository';
-import { ExceptionModel } from 'src/infraestructure/Exceptions/exceptions.model';
+import { CommandAppointmentCase } from "src/application/Appointments/UseCases/command/CommandAppointmentCase";
+import { AppointmentService } from 'src/domain/Appointments/Services/AppointmentCommandService/AppointmentService';
 import { AppointmentDTO } from 'src/domain/Appointments/Repository/DTO/AppointmentDTO';
-import { DBRepository } from 'src/domain/Users/repositories/DB/DBRepository';
+import { DBRepository } from 'src/domain/UserActions/Users/repositories/DB/DBRepository';
+import { QueryAppointmentCase } from 'src/application/Appointments/UseCases/query/QueryAppointmentCase';
+import { BussinessExcp } from 'src/domain/Exceptions/BussinessExcp';
+import { UnauthorizedExcp } from 'src/domain/Exceptions/UnauthorizedExcp';
+import { AppointmentBussinessLogicRepository } from 'src/domain/Appointments/Repository/AppointmentBussinessLogicRepository';
+import { UserBussinessLogicRepository } from 'src/domain/UserActions/Users/repositories/Users/UserBussinessLogicRepository';
+import { AppointmentQueryRepository } from 'src/domain/Appointments/Repository/AppointmentQueryRepository';
+import { User } from 'src/infraestructure/Users/EntityManager/user.entity';
 
 const sinonSandbox = createSandbox();
 describe('AppointmentController', () => {
     let app: INestApplication;
-    let appointmentRepository: SinonStubbedInstance<AppointmentRepository>;
-    let appointmentValidationRepository: SinonStubbedInstance<AppointmentValidationRepository>;
+    let quertAppointmentCase : SinonStubbedInstance<QueryAppointmentCase>;
+    let appointmentBussinessLogicRepository: SinonStubbedInstance<AppointmentBussinessLogicRepository>;
+    let userBussinessLogicRepository: SinonStubbedInstance<UserBussinessLogicRepository>;
     let dbRepository: SinonStubbedInstance<DBRepository>;
+    let appointmentQueryRepository: SinonStubbedInstance<AppointmentQueryRepository>;
+
+    let appointmentRepository : SinonStubbedInstance<AppointmentRepository>;
+
     beforeAll(async () => {
-        appointmentRepository = createStubObj<AppointmentRepository>(['createAppointment', 'listAppointments'], sinonSandbox);
-        appointmentValidationRepository = createStubObj<AppointmentValidationRepository>(['VerifyIfDoctorHaveAppointment', 'VerifyRole',
-            'VerifyAppointmentStatus', 'VerifyAppointmentByIdsAndReturn', 'VerifyDNI'
-            , 'VerifyIfCustomerHaveBalance', 'VerifyAppointmentByIdAndReturn'], sinonSandbox);
-        dbRepository = createStubObj<DBRepository>(['UpdateBalance', 'findOneById'], sinonSandbox);
+
+        appointmentRepository = createStubObj<AppointmentRepository>([
+            'cancelAppointment', 'createAppointment', 'deleteAppointment', 'listAppointments'
+            ,'takeAppointment'
+        ], sinonSandbox);
+
+        quertAppointmentCase = createStubObj<QueryAppointmentCase>(['executeAgendaList', 'executeList', 'executeMyList'], sinonSandbox);
+
+        appointmentBussinessLogicRepository = createStubObj<AppointmentBussinessLogicRepository>(['verifyIfDoctorHaveAppointment', 'verifyRole',
+            'verifyAppointmentStatusAndReturn', 'verifyAppointmentByIdsAndReturn', 'verifyDNI'
+            , 'verifyIfCustomerHaveBalance', 'verifyAutoSelect', 'verifyIfCustomerHaveAppointment', 'verifyAppointmentByIdAndReturn', 'verifyAppointmentValidDate'], sinonSandbox);
+
+        dbRepository = createStubObj<DBRepository>(['updateUser', 'findOneById'], sinonSandbox);
+
+        userBussinessLogicRepository = createStubObj<UserBussinessLogicRepository>(
+            ['userAlreadyExists', 'userAlreadyExistsAndReturn', 'userHaveBalance', 'validationPassword'], sinonSandbox);
+
+        appointmentQueryRepository = createStubObj<AppointmentQueryRepository>([
+            'executeAgendaList'
+        ], sinonSandbox);
+
+
         const moduleRef = await Test.createTestingModule({
-            imports: [ExceptionModel],
             controllers: [AppointmentController],
-            providers: [createAppointmentCase,
+            providers: [CommandAppointmentCase,
                 AppointmentService,
-                { provide: AppointmentRepository, useValue: appointmentRepository },
-                { provide: AppointmentValidationRepository, useValue: appointmentValidationRepository },
-                { provide: DBRepository, useValue: dbRepository }]
+                QueryAppointmentCase,
+                AppointmentService,
+                {provide: AppointmentRepository, useValue: appointmentRepository},
+                { provide: QueryAppointmentCase, useValue: quertAppointmentCase },
+                { provide: DBRepository, useValue: dbRepository },
+                { provide: UserBussinessLogicRepository, useValue: userBussinessLogicRepository },
+                { provide: AppointmentBussinessLogicRepository, useValue: appointmentBussinessLogicRepository }
+                , { provide: AppointmentQueryRepository, useValue: appointmentQueryRepository }
+            ]
+
         }).compile();
 
         app = moduleRef.createNestApplication();
@@ -43,82 +76,29 @@ describe('AppointmentController', () => {
     const commonHeader = {
         userid: 1
     }
-    it('It should get appointments list', async () => {
-        const appoitmentsList: Appointments[] = [{ idAppointment: 1, idDoctor: 1, doctorname: "Juan Zapata", appointmentdate: "2020-12-28 07:00:00.000", costappointment: 80500, appointmentStatus: 0, IsFestive: 'false', idUser: null }];
-        appointmentRepository.listAppointments.returns(Promise.resolve(appoitmentsList));
 
-        return await request(app.getHttpServer())
-            .get('/api/appointments')
-            .set(commonHeader)
-            .expect(HttpStatus.OK)
-            .expect(appoitmentsList);
-    });
-    it('It should be fail if the doctor have an appointment on the same hour', async () => {
-
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(true));
-        const appointment: AppointmentDTO = {
-            idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
-            cost: 80500,
-            status: 0,
-            IsFestive: false,
-            idUser: null
-        }
-        const response: request.Response= await request(app.getHttpServer())
-            .post('/api/appointments')
-            .set(commonHeader)
-            .send(appointment)
-            .expect(HttpStatus.BAD_REQUEST);
-
-        expect(response.body.message).toEqual('Solo puedes crear una cita cada hora');
-    });
-    it('It should be fail if the role is a Customer', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
-        const appointment: AppointmentDTO = {
-            idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
-            cost: 80500,
-            status: 0,
-            IsFestive: false,
-            idUser: null
-        }
-        const response : request.Response= await request(app.getHttpServer())
-            .post('/api/appointments')
-            .set(commonHeader)
-            .send(appointment)
-            .expect(HttpStatus.UNAUTHORIZED);
-
-        expect(response.body.message).toEqual('No puedes crear una cita');
-    });
     it('It should be fail if the appointment Date not is specific format', async () => {
-      
+
         const appointment: any = {
             idDoctor: 1,
-            doctorname: 'Juan Zapata',
+            doctorname: 'DOCTOR NAME',
             appointmentDate: '000/29/11/2020/8:00:00',
             cost: 80500,
-            status: 0,
-            IsFestive: false
         }
-        const response : request.Response= await request(app.getHttpServer())
+        const response: request.Response = await request(app.getHttpServer())
             .post('/api/appointments')
             .set(commonHeader)
             .send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual(["Formato de fecha invalido"]);
+        expect(response.body.message.code).toEqual('invalid_date_format');
     });
 
-    it('It should be fail if the cost not is numeric only', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
+    it('It should be fail if the cost is higher to 1000000', async () => {
         const appointment: any = {
             idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
-            cost: '@80500',
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '29/11/2020/8:00',
+            cost: 2000000,
             status: 0,
             IsFestive: false,
             idUser: null
@@ -126,228 +106,324 @@ describe('AppointmentController', () => {
         const response: request.Response = await request(app.getHttpServer())
             .post('/api/appointments').set(commonHeader).send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual({ "error": "Bad Request", "message": ["cost must be a number conforming to the specified constraints"], "statusCode": HttpStatus.BAD_REQUEST });
-    });
-
-    it('It should be fail if the cost is higher to 1000000', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
-        const appointment: any = {
-            idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
-            cost: 2000000,
-            status: 0,
-            IsFestive: false,
-            idUser: null
-        }
-        const response : request.Response= await request(app.getHttpServer())
-            .post('/api/appointments').set(commonHeader).send(appointment)
-            .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual(["El precio maximo del cost es 1000000"]);
+        expect(response.body.message.code).toEqual('invalid_maximum_appointment_cost');
     });
 
     it('It should be fail if the cost is less to 0', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
         const appointment: any = {
             idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '29/11/2020/8:00',
             cost: -10,
             status: 0,
             IsFestive: false,
             idUser: null
         }
-        const response : request.Response= await request(app.getHttpServer())
+        const response: request.Response = await request(app.getHttpServer())
             .post('/api/appointments').set(commonHeader).send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual(["El precio minimo del cost es 0"]);
+        expect(response.body.message.code).toEqual('invalid_cost_format');
     });
 
-    it('It should be fail if the status not is numeric only', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
-        const appointment: any = {
-            idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
-            cost: 80500,
-            status: '0@',
-            IsFestive: false,
-            idUser: null
-        }
-        const response : request.Response= await request(app.getHttpServer())
-            .post('/api/appointments').set(commonHeader).send(appointment)
-            .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual({ "error": "Bad Request", "message": ["status must be a number conforming to the specified constraints"], "statusCode": HttpStatus.BAD_REQUEST });
-    });
-    it('It should be fail if IsFestive not is boolean only', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
-        const appointment: any = {
-            idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '29/11/2020/8:00:00',
-            cost: 80500,
-            status: 0,
-            IsFestive: '@false',
-            idUser: null
-        }
-        const response : request.Response= await request(app.getHttpServer())
-            .post('/api/appointments').set(commonHeader).send(appointment)
-            .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual({ "error": "Bad Request", "message": ["IsFestive must be a boolean value"], "statusCode": HttpStatus.BAD_REQUEST });
-    });
 
     it('It should be fail if is Sunday', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
+
         const appointment: any = {
             idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '27/11/2020/11:00:00', // Real calendar
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '27/11/2020/11:00', // Real calendar
             cost: 80500,
             status: 0,
             IsFestive: false,
             idUser: null
         }
-        const response : request.Response= await request(app.getHttpServer())
+        const response: request.Response = await request(app.getHttpServer())
             .post('/api/appointments').set(commonHeader).send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual(["No puedes crear una cita el dia Domingo"]);
+        expect(response.body.message.code).toEqual('invalid_appointment_day');
     });
 
     it('It should be fail if is not is working hours', async () => {
-        appointmentValidationRepository.VerifyIfDoctorHaveAppointment.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
+
         const appointment: any = {
             idDoctor: 1,
-            doctorname: 'Juan Zapata',
-            appointmentDate: '28/11/2020/6:00:00',
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '28/11/2020/6:00',
             cost: 80500,
             status: 0,
             IsFestive: false,
             idUser: null
         }
-        const response : request.Response= await request(app.getHttpServer())
+        const response: request.Response = await request(app.getHttpServer())
             .post('/api/appointments').set(commonHeader).send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-        expect(response.body).toEqual(["No puedes crear citas en este horario"]);
+        expect(response.body.message.code).toEqual('invalid_appointment_schedule');
     });
 
-    it('It should be fail if the appointment not is available', async () => {
-        appointmentValidationRepository.VerifyAppointmentStatus.returns(Promise.resolve(null));
-        const selectAppointment: any = {
-            AppointmentId: 1,
-            week: '28/11/2020/7:00:00',
+
+
+
+
+
+
+
+
+
+    it('It should get available appointments list', async () => {
+        const appoitmentsList: any = [{ idAppointment: 1, idDoctor: 1, doctorname: "firstname lastname", appointmentdate: "2020-12-28 07:00:00.000", costappointment: 80500, appointmentStatus: 0, idUser: null, createdAt: new Date().toString() }];
+
+        await quertAppointmentCase.executeList.returns(appoitmentsList);
+
+        const response = await request(app.getHttpServer())
+            .get('/api/appointments')
+            .set(commonHeader)
+            .expect(HttpStatus.OK);
+        expect(response.body.message).toEqual(appoitmentsList);
+
+    });
+
+    it('It should get my appointments list', async () => {
+        const appoitmentsList: any = [{ idAppointment: 1, idDoctor: 1, doctorname: "firstname lastname", appointmentdate: "2020-12-28 07:00:00.000", costappointment: 80500, appointmentStatus: 1, idUser: 1, createdAt: new Date().toString() }];
+
+        await quertAppointmentCase.executeMyList.returns(appoitmentsList);
+
+        const response = await request(app.getHttpServer())
+            .get('/api/appointments/me')
+            .set(commonHeader)
+            .expect(HttpStatus.OK);
+        expect(response.body.message).toEqual(appoitmentsList);
+
+    });
+
+    
+    it('It should get agenda appointments list', async () => {
+        const appoitmentsList: any = [{ date: '', state: 0}];
+
+        await quertAppointmentCase.executeAgendaList.returns(appoitmentsList);
+
+        const response = await request(app.getHttpServer())
+            .get('/api/appointments/agenda')
+            .set(commonHeader)
+            .expect(HttpStatus.OK);
+        expect(response.body.message).toEqual(appoitmentsList);
+
+    });
+
+
+    it('should be fail if the doctor want create appointment in the past', async () => {
+        const appointment: AppointmentDTO = {
+            idDoctor: 1,
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '29/11/2020/8:00',
+            cost: 0,
+            idUser: null
         }
-        const response : request.Response= await request(app.getHttpServer())
-            .put('/api/appointments').set({userId: 1}).send(selectAppointment)
+        appointmentBussinessLogicRepository.verifyAppointmentValidDate.throws(new BussinessExcp({ code: 'appointment_create_expired' }));
+        const response: request.Response = await request(app.getHttpServer())
+            .post('/api/appointments')
+            .set(commonHeader)
+            .send(appointment)
             .expect(HttpStatus.BAD_REQUEST);
-            expect(response.body.message).toEqual('La cita no se encuentra disponible');
+
+        expect(response.body.message.code).toBe('appointment_create_expired');
+    });
+
+    it('It should be fail if the doctor have an appointment on the same hour', async () => {
+        const appointment: AppointmentDTO = {
+            idDoctor: 1,
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '29/11/2020/8:00',
+            cost: 0,
+            idUser: null
+        }
+        appointmentBussinessLogicRepository.verifyAppointmentValidDate.returns({});
+        appointmentBussinessLogicRepository.verifyIfDoctorHaveAppointment.throws(new BussinessExcp({ code: 'invalid_appointment_hour' }));
+        const response: request.Response = await request(app.getHttpServer())
+            .post('/api/appointments')
+            .set(commonHeader)
+            .send(appointment)
+            .expect(HttpStatus.BAD_REQUEST);
+
+        expect(response.body.message.code).toEqual('invalid_appointment_hour');
+    });
+    it('It should be fail if the role is a Customer', async () => {
+        const appointment: AppointmentDTO = {
+            idDoctor: 1,
+            doctorname: 'DOCTOR NAME',
+            appointmentDate: '29/11/2020/8:00',
+            cost: 80500,
+            idUser: null
+        }
+        appointmentBussinessLogicRepository.verifyAppointmentValidDate.returns({});
+        appointmentBussinessLogicRepository.verifyIfDoctorHaveAppointment.returns({});
+        appointmentBussinessLogicRepository.verifyRole.throws(new UnauthorizedExcp({ code: 'invalid_permisons' }))
+        const response: request.Response = await request(app.getHttpServer())
+            .post('/api/appointments')
+            .set(commonHeader)
+            .send(appointment)
+            .expect(HttpStatus.UNAUTHORIZED);
+        expect(response.body.message.code).toBe('invalid_permisons');
+    });
+
+    it('should fail if the user wants to select his appointment', async () => {
+        const selecte_appointment: any = {
+            AppointmentId: 1,
+            week: '28/11/2020/7:00',
+        }
+
+        appointmentBussinessLogicRepository.verifyAutoSelect.throws(new BussinessExcp({ code: 'auto_appointment' }));
+
+        const response: request.Response = await request(app.getHttpServer())
+            .put('/api/appointments').set({ userId: 1 }).send(selecte_appointment)
+            .expect(HttpStatus.BAD_REQUEST);
+        expect(response.body.message.code).toEqual('auto_appointment');
+    });
+
+    it('should fail if the user have an appointment in the same hour', async () => {
+        const selecte_appointment: any = {
+            AppointmentId: 1,
+            week: '28/11/2020/7:00',
+        }
+
+        appointmentBussinessLogicRepository.verifyAutoSelect.returns({});
+        appointmentBussinessLogicRepository.verifyIfCustomerHaveAppointment.throws(new BussinessExcp({ code: 'invalid_appointment_hour' }))
+
+        const response: request.Response = await request(app.getHttpServer())
+            .put('/api/appointments').set({ userId: 1 }).send(selecte_appointment)
+            .expect(HttpStatus.BAD_REQUEST);
+        expect(response.body.message.code).toEqual('invalid_appointment_hour');
+    });
+
+
+    it('It should be fail if the appointment not is available', async () => {
+        const selecte_appointment: any = {
+            AppointmentId: 1,
+            week: '28/11/2020/7:00',
+        }
+        appointmentBussinessLogicRepository.verifyAutoSelect.returns({});
+        appointmentBussinessLogicRepository.verifyIfCustomerHaveAppointment.returns({});
+        appointmentBussinessLogicRepository.verifyAppointmentStatusAndReturn.throws(new BussinessExcp({ code: 'appointment_not_exists' }));
+
+        const response: request.Response = await request(app.getHttpServer())
+            .put('/api/appointments').set({ userId: 1 }).send(selecte_appointment)
+            .expect(HttpStatus.BAD_REQUEST);
+        expect(response.body.message.code).toEqual('appointment_not_exists');
+    });
+
+    it('It should be fail if the usar want to select appointment in the past', async () => {
+        const selecte_appointment: any = {
+            AppointmentId: 1,
+            week: '28/11/2020/7:00',
+        }
+        appointmentBussinessLogicRepository.verifyAutoSelect.returns({});
+        appointmentBussinessLogicRepository.verifyIfCustomerHaveAppointment.returns({});
+        appointmentBussinessLogicRepository.verifyAppointmentStatusAndReturn.returns(Promise.resolve(new Appointments()));
+        appointmentBussinessLogicRepository.verifyAppointmentValidDate.throws(new BussinessExcp({ code: 'appointment_select_expired' }));
+
+        const response: request.Response = await request(app.getHttpServer())
+            .put('/api/appointments').set({ userId: 1 }).send(selecte_appointment)
+            .expect(HttpStatus.BAD_REQUEST);
+        expect(response.body.message.code).toEqual('appointment_select_expired');
     });
 
     it("It should be fail if the Customer don't have balance", async () => {
 
-        const appointment : any = {
-            idAppointment : 1,
+        const appointment: any = {
+            idAppointment: 1,
             idDoctor: 1,
-            doctorname: "Juan Zapata",
+            doctorname: "DOCTOR NAME",
             appointmentDate: "25/11/2020/10:59:59",
             costappointment: 80500,
             appointmentStatus: 0,
             IsFestive: 'false',
             idUser: 1
         }
-        appointmentValidationRepository.VerifyAppointmentStatus.returns(Promise.resolve(appointment));
-        appointmentValidationRepository.VerifyIfCustomerHaveBalance.returns(Promise.resolve(false));
+        appointmentBussinessLogicRepository.verifyAutoSelect.returns({});
+        appointmentBussinessLogicRepository.verifyIfCustomerHaveAppointment.returns({});
+        appointmentBussinessLogicRepository.verifyAppointmentStatusAndReturn.returns(Promise.resolve(new Appointments()));
+        appointmentBussinessLogicRepository.verifyAppointmentValidDate.returns({});
+        appointmentBussinessLogicRepository.verifyIfCustomerHaveBalance.throws(new BussinessExcp({ code: 'insuficient_balance' }));
+
         const selectAppointment: any = {
             AppointmentId: 1,
-            week: '28/11/2020/7:00:00',
+            week: '28/11/2020/7:00',
         }
-        const response : request.Response = await request(app.getHttpServer())
+        const response: request.Response = await request(app.getHttpServer())
             .put('/api/appointments').set(commonHeader).send(selectAppointment)
             .expect(HttpStatus.BAD_REQUEST);
-             expect(response.body).toEqual({ statusCode: 400, message: 'No tienes saldo disponible' });
+        expect(response.body.message.code).toEqual('insuficient_balance');
     });
 
-    it("It should be fail if the Customer don't have pico y cedula", async () => {
+        it("It should be fail if the Customer don't have dni day", async () => {
 
-        const appointment : any = {
-            idAppointment : 1,
-            idDoctor: 1,
-            doctorname: "Juan Zapata",
-            appointmentDate: "25/11/2020/10:59:59",
-            costappointment: 80500,
-            appointmentStatus: 0,
-            IsFestive: 'false',
-            idUser: 1
-        }
-        const user : any = {
-            userId: 1,
-            email : 'asd@asd.com',
-            password: '12345',
-            firstname: 'juan',
-            lastname: 'zapata',
-            dni: '1234567890',
-            balande: 1000000,
-            role: 'Customer'
-        }
-        appointmentValidationRepository.VerifyAppointmentStatus.returns(Promise.resolve(appointment));
-        appointmentValidationRepository.VerifyIfCustomerHaveBalance.returns(Promise.resolve(user));
-        const selectAppointment: any = {
-            AppointmentId: 1,
-            week: '28/11/2020/7:00:00',
-        }
-        const response : request.Response = await request(app.getHttpServer())
-            .put('/api/appointments').set(commonHeader).set(commonHeader).send(selectAppointment)
-            .expect(HttpStatus.BAD_REQUEST);
-            expect(response.body).toEqual({ statusCode: 400, message: 'No te encuentras en día pico y cédula' });
-    });
+            const appointment : any = {
+                idAppointment : 1,
+                idDoctor: 1,
+                doctorname: "DOCTOR NAME",
+                appointmentDate: "25/11/2020/10:59",
+                costappointment: 80500,
+                appointmentStatus: 0,
+                IsFestive: 'false',
+                idUser: 1
+            }
+            const user : any = {
+                userId: 1,
+                email : 'asd@asd.com',
+                password: '12345',
+                firstname: 'firstname',
+                lastname: 'lastname',
+                dni: '1234567890',
+                balande: 1000000,
+                role: 'Customer'
+            }
+            appointmentBussinessLogicRepository.verifyAutoSelect.returns({});
+            appointmentBussinessLogicRepository.verifyIfCustomerHaveAppointment.returns({});
+            appointmentBussinessLogicRepository.verifyAppointmentStatusAndReturn.returns(Promise.resolve(new Appointments()));
+            appointmentBussinessLogicRepository.verifyAppointmentValidDate.returns({});
+            appointmentBussinessLogicRepository.verifyIfCustomerHaveBalance.returns(Promise.resolve(new User()));
+            appointmentBussinessLogicRepository.verifyDNI.throws(new BussinessExcp({ code: 'invalid_dni_day' }));
 
-//  Cancel Appointment
-    it("It should be fail if the appointment do not exists", async () => {
+            const selectAppointment: any = {
+                AppointmentId: 1,
+                week: '28/11/2020/7:00',
+            }
+            const response : request.Response = await request(app.getHttpServer())
+                .put('/api/appointments').set(commonHeader).set(commonHeader).send(selectAppointment)
+                .expect(HttpStatus.BAD_REQUEST);
+                expect(response.body.message.code).toEqual('invalid_dni_day');
+        });
 
-        appointmentValidationRepository.VerifyAppointmentByIdsAndReturn.returns(Promise.resolve(false));
-        appointmentValidationRepository.VerifyAppointmentByIdAndReturn.returns(Promise.resolve(false));
-        const response : request.Response = await request(app.getHttpServer())
-            .put('/api/appointments/1')
-            .set(commonHeader)
-            .expect(HttpStatus.BAD_REQUEST);
-             expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST, message: 'La cita no existe' });
-    });
+    // // //  Cancel Appointment
+        it("It should be fail if the appointment do not exists", async () => {
 
-    it("It should be fail if the user do not exists", async () => {
+            appointmentBussinessLogicRepository.verifyAppointmentByIdsAndReturn.throws(new BussinessExcp({code:'appointment_not_exists'}));
+            const response : request.Response = await request(app.getHttpServer())
+                .put('/api/appointments/1')
+                .set(commonHeader)
+                .expect(HttpStatus.BAD_REQUEST);
+                 expect(response.body.message.code).toEqual('appointment_not_exists');
+        });
 
-        const appointment : any = {
-            idAppointment : 1,
-            idDoctor: 1,
-            doctorname: "Juan Zapata",
-            appointmentDate: "25/11/2020/10:59:59",
-            costappointment: 80500,
-            appointmentStatus: 0,
-            IsFestive: 'false',
-            idUser: 1
-        }
-        appointmentValidationRepository.VerifyAppointmentByIdsAndReturn.returns(Promise.resolve(appointment));
-        dbRepository.findOneById.returns(Promise.resolve(null));
-        const response : request.Response = await request(app.getHttpServer())
-            .put('/api/appointments/1')
-            .set(commonHeader)
-            .expect(HttpStatus.BAD_REQUEST);
-            expect(response.body).toEqual({ statusCode: HttpStatus.BAD_REQUEST, message: 'El usuario no existe' });
-    });
+        it("It should be fail if the user do not exists", async () => {
 
-    it("It should be fail if the user do not is a Doctor", async () => {
+            appointmentBussinessLogicRepository.verifyAppointmentByIdsAndReturn.returns(Promise.resolve(new Appointments()));
+            userBussinessLogicRepository.userAlreadyExistsAndReturn.throws(new BussinessExcp({code:'email_not_found'}));
+            const response : request.Response = await request(app.getHttpServer())
+                .put('/api/appointments/1')
+                .set(commonHeader)
+                .expect(HttpStatus.BAD_REQUEST);
+                expect(response.body.message.code).toEqual('email_not_found');
+        });
 
-        appointmentValidationRepository.VerifyRole.returns(Promise.resolve(false));
-        const response : request.Response = await request(app.getHttpServer())
-            .delete('/api/appointments/1')
-            .set(commonHeader)
-            .expect(HttpStatus.UNAUTHORIZED);
-            expect(response.body).toEqual({ statusCode: HttpStatus.UNAUTHORIZED, message: 'No puedes cancelar una cita' });
-    });
+        it("It should be fail if the user do not is a Doctor", async () => {
+
+            appointmentBussinessLogicRepository.verifyRole.throws(new UnauthorizedExcp({code: 'invalid_permisons'}));
+            const response : request.Response = await request(app.getHttpServer())
+                .delete('/api/appointments/1')
+                .set(commonHeader)
+                .expect(HttpStatus.UNAUTHORIZED);
+                expect(response.body.message.code).toEqual('invalid_permisons');
+        });
 });
 
 

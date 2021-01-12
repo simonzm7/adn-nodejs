@@ -1,99 +1,57 @@
-import { AppointmentDTO } from "../Repository/DTO/AppointmentDTO";
-
+import GlobalModelValidations from '../../Validations/GlobalModelValidations';import { BussinessExcp } from "src/domain/Exceptions/BussinessExcp";
+;
 export class AppointmentModel {
 
-    private readonly appointment: AppointmentDTO;
-    private readonly errors: string[];
-    constructor(appointment: AppointmentDTO) {
+    private readonly idDoctor : number;
+    private readonly doctorname : string;
+    private readonly appointmentDate : string;
+    private readonly StructuredDate : Date;
+    private readonly cost : number;
+    constructor(idDoctor : number, doctorname : string, appointmentDate: string, cost: number) {
 
-        this.appointment = appointment;
-        var Initialize: string[] = [];
-        Initialize.push(this.validFormat(this.appointment['appointmentDate']));
-        this.appointment['appointmentDate'] = this.structureDate();
-        Initialize = [...Initialize,
-            this.Check('idDoctor').IsNumber(),
-            this.Check('appointmentDate').validDay(),
-            this.Check('appointmentDate').validHours(this.appointment.IsFestive === true ? true : false),
-            this.Check('cost').IsLength({ min: 0, max: 1000000 }),
-            
-        ];
-        const errors: string[] = this.ValidInputs(Initialize);
-        this.errors = errors;
+        this.idDoctor = idDoctor;
+        this.doctorname = doctorname;
+        this.appointmentDate = appointmentDate;
+        this.cost = cost;
+        this.StructuredDate = this.structureDate();
+       this.initializeValidations();
+    }
+    initializeValidations(){
+        GlobalModelValidations.validDateFormat(this.appointmentDate);
+        GlobalModelValidations.validDay(this.StructuredDate.getDay());
+        GlobalModelValidations.validHours(this.appointmentDate, this.StructuredDate.getHours());
+        GlobalModelValidations.isNumber('', this.idDoctor.toString());
+        GlobalModelValidations.isNumber('cost', this.cost.toString());
+        GlobalModelValidations.isHigherOrLower(this.cost, { min: 0, max: 1000000 });
     }
     thereErrors(list: string[]) {
         return Promise.reject({ message: list, statusCode: 400 });
     }
     structureDate() {
-        const splited: string[] = this.appointment['appointmentDate'].split('/');
+        const splited: string[] = this.appointmentDate.split('/');
         const DateTime: string[] = splited[3].split(':');
         const date: Date = new Date(parseInt(splited[2]), parseInt(splited[1]), parseInt(splited[0])
-            , parseInt(DateTime[0]), parseInt(DateTime[1]), parseInt(DateTime[2]));
+            , parseInt(DateTime[0]), parseInt(DateTime[1]));
         return date;
-
     }
-    validFormat(format: string) {
-        const dateRegex: RegExp = /^([0-2][0-9]|(3)[0-1])(\/)(((0)[0-9])|((1)[0-1]))(\/)\d{4}(\/)(?:2[0-3]|[01]?[0-9]):[0-5][0-9]:[0-5][0-9]$/
-        if (!dateRegex.test(format))
-        {
-            return 'Formato de fecha invalido';
-        }
-    }
-    ValidInputs(inputs: string[]): string[] {
-        const errors: string[] = [];
-        inputs.forEach(e => { if (e) errors.push(e) })
-        return errors;
-    }
-    Check(valueName: string) {
-        const time: Date = this.appointment[valueName];
-        return {
-            validDay: () => {
-                if (time.getDay() === 0)
-                    return 'No puedes crear una cita el dia Domingo';
-            },
-            validHours: (IsFestive: boolean) => { //Parameters based on a interface, I have that create interface
-                const Hour: number = time.getHours();
-                if (!IsFestive && Hour < 7 || Hour === 12 || Hour > 17)
-                    return 'No puedes crear citas en este horario';
-
-                if (IsFestive && Hour < 10 || Hour === 12 || Hour > 15)
-                    return 'No puedes crear citas en este horario';
-            },
-            IsNumber: () => {
-                const numberRegex: RegExp = /^[0-9]+$/;
-                if (!numberRegex.test(this.appointment[valueName]))
-                    return `El ${valueName} debe ser solo numérico`;
-            },
-            IsLength: (conditions: { min: number, max: number }) => {
-                if (this.appointment[valueName] < conditions.min)
-                    return `El precio minimo del ${valueName} es ${conditions.min}`;
-                if (this.appointment[valueName] > conditions.max)
-                    return `El precio maximo del ${valueName} es ${conditions.max}`;
-            }
-        }
-    }
-    get getErrors(): string[] {
-        return this.errors;
-    }
-    get DateTime(): any {
-        return this.appointment.appointmentDate;
+    ValidInputs(inputs: string[]) {
+        inputs.forEach(e => { if (e) throw new BussinessExcp(e) })
     }
     get getDoctorId(): number {
-        return this.appointment.idDoctor;
+        return this.idDoctor;
     }
-    get doctorname(): string {
-        return this.appointment.doctorname;
+    get getDoctorname(): string {
+        return this.doctorname;
     }
 
-    get appointmentDate(): string {
-        return this.appointment.appointmentDate;
+    get getAppointmentDate(): string {
+        return this.appointmentDate;
     }
-    get cost(): number {
-        return this.appointment.cost;
+    get getCost(): number {
+        return this.cost;
     }
-    get status(): number {
-        return this.appointment.cost;
-    }
-    get IsFestive(): boolean {
-        return this.appointment.IsFestive;
+
+    get getStructuredDate(): Date{
+        return this.StructuredDate;
     }
 }

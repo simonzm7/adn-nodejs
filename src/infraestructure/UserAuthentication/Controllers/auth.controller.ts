@@ -1,22 +1,29 @@
-import { Controller, Post, Body, Res, UsePipes, ValidationPipe } from "@nestjs/common";
-import UserLoginManagement from "src/application/UserAuthentication/UsesCases/UserLoginManagement";
-import ExceptionRepository from "src/domain/Exceptions/Repository/ExceptionRepository";
-import LoginDTO from "src/domain/UserAuthentication/Repository/DTO/LoginDTO";
+import { Controller, Post, Body, Res, UsePipes, ValidationPipe, UseGuards, HttpStatus, Req, Get } from "@nestjs/common";
+import { QueryUser } from "src/application/UserAuthentication/UsesCases/Query/QueryUser";
+import UserLoginManagement from "src/application/UserAuthentication/UsesCases/Command/UserLoginManagement";
+import LoginDTO from "src/domain/UserActions/UserAuthentication/Repository/DTO/LoginDTO";
+import { AuthGuard } from "src/infraestructure/Appointments/adapters/Guard/AuthGuard";
 
 
 
 @Controller('api/auth')
 export default class UserAuthenticationController {
     constructor(private readonly authManagment : UserLoginManagement,
-        private readonly exceptionRepository : ExceptionRepository) {}
+        private readonly queryUser : QueryUser) {}
+
     @UsePipes(new ValidationPipe({transform : true}))
     @Post()
     async logIn(@Body() credentials : LoginDTO, @Res() res) {
-        try{
-            const e : any = await this.authManagment.ExecuteLogin(credentials);
-            res.status(e.statusCode).send(e.message);
-        }catch (e){
-            this.exceptionRepository.createException(e.message, e.statusCode);
-        }
+        await this.authManagment.executeLogin(credentials);
     }
+
+
+
+    @UseGuards(AuthGuard)
+    @Get('me')
+    async IsAuthenticated(@Req() req)
+    {
+        await this.queryUser.executeQuery(req.headers.userid);
+    }
+
 }

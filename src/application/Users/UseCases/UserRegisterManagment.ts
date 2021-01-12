@@ -1,22 +1,23 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from 'src/domain/Users/models/UserModel';
-import { UserDTO } from 'src/domain/Users/repositories/Users/DTO/UserDTO';
-import { UserService } from 'src/domain/Users/services/UserService';
-import { UserException } from 'src/infraestructure/Exceptions/Adapters/UserException';
+import { UserModel } from 'src/domain/UserActions/Users/models/UserModel';
+import { UserDTO } from 'src/domain/UserActions/Users/repositories/Users/DTO/UserDTO';
+import { BalanceService } from 'src/domain/UserActions/Users/services/BalanceService';
+import { UserService } from 'src/domain/UserActions/Users/services/UserService';
 
 
 @Injectable()
 export class UserRegisterManagment {
-    constructor(private readonly userService : UserService) {}
+    constructor(private readonly userService : UserService,
+        private readonly balanceService : BalanceService) {}
 
-    public async Execute(user : UserDTO) : Promise<{}>
+    public async executeCreate(user : UserDTO)
     {
-        return await this.userService.Execute(
+        await this.userService.executeCreate(
             new UserModel(user)
         ); 
     }
-    public async ExecuteBalance(balance : number, userId : number) : Promise<{}>
+    public async executeBalance(balance : number, userId : number)
     {
-        return await this.userService.ExecuteBalance(balance, userId);
+        await this.balanceService.executeBalance(balance, userId);
     }
 }

@@ -22,9 +22,9 @@ export class Appointments{
     appointmentStatus : number;
 
     @Column()
-    IsFestive : string;
+    idUser : number;
 
     @Column()
-    idUser : number;
+    createdAt : Date;
 
 }

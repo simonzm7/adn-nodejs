@@ -15,17 +15,21 @@ pipeline{
 		}
 		
 		stages{
-	
+			stage('Install'){
+                steps {
+					sh 'npm run prebuild'
+                    sh 'npm i'				
+				}
+            }
+			stage('Unit Tests'){
+                steps {
+                    sh 'npm run test:cov'					
+				}
+            }
 			stage('Compile'){
                 steps {
 					sh 'npm run prebuild'
-                    sh 'npm i'
                     sh 'npm run build'					
-				}
-            }
-            stage('Unit Tests'){
-                steps {
-                    sh 'npm run test:cov'					
 				}
             }
 
@@ -34,7 +38,7 @@ pipeline{
 			 	steps{
 			 		echo '------------>Analisis de código estático<------------'
 			 		  withSonarQubeEnv('Sonar') {
-                         sh "${tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'}/bin/sonar-scanner -Dsonar.projectKey=co.com.cliente:proyecto.nombre.apellido.master -Dsonar.projectName=co.com.cliente:proyecto.nombre.apellido.master -Dproject.settings=./sonar-project.properties"
+                         sh "${tool name: 'SonarScanner', type: 'hudson.plugins.sonar.SonarRunnerInstallation'}/bin/sonar-scanner -Dsonar.projectKey=co.com.cliente:adnceiba.juan.monsalve.master -Dsonar.projectName=co.com.adnceiba.juan.monsalve.master -Dproject.settings=./sonar-project.properties"
                       }
 			 	}
 			 }

@@ -1,44 +1,55 @@
-import UserAuthModel from "src/domain/UserAuthentication/Model/UserAuthModel";
-import LoginDTO from "src/domain/UserAuthentication/Repository/DTO/LoginDTO";
-import UserAuthenticationService from "src/domain/UserAuthentication/Service/UserAuthenticationService";
-import { UserException } from "src/infraestructure/Exceptions/Adapters/UserException";
+import { BussinessExcp } from "src/domain/Exceptions/BussinessExcp";
+import UserAuthModel from "src/domain/UserActions/UserAuthentication/Model/UserAuthModel";
+import LoginDTO from "src/domain/UserActions/UserAuthentication/Repository/DTO/LoginDTO";
+import UserAuthenticationService from "src/domain/UserActions/UserAuthentication/Service/UserAuthenticationService";
 import { User } from "src/infraestructure/Users/EntityManager/user.entity";
 
 
 describe('Domain - AuthUserService', () => {
 
     it("It should be fail if the user on authentication don't exists", async () => {
-        const _userAuthenticationService: UserAuthenticationService = new UserAuthenticationService(null, {
-            UserAlreadyExists: jest.fn(async (email, dni) => false),
-            UserAlreadyExistsAndReturn: jest.fn(async (email) => null),
-            VerifyBalancaCapacity: jest.fn((balance : number, userBalance : number) => 0)
-        }, {
-            validation: jest.fn((credentials: UserAuthModel, password: string) => false)
-        });
-        const user: LoginDTO = {
-            email: '',
-            password: ''
+        try {
+            const _userAuthenticationService: UserAuthenticationService = new UserAuthenticationService(null,
+                {
+                    userAlreadyExists: jest.fn(async (email, dni) => { }),
+                    userAlreadyExistsAndReturn: jest.fn(async (email) => { throw new BussinessExcp({ code: 'email_not_found' }) }),
+                    userHaveBalance: jest.fn(async (balance: number, userBalance: number) => { }),
+                    validationPassword: jest.fn((credentials: UserAuthModel, password: string) => { })
+                });
+            const user: LoginDTO = {
+                email: 'asd@asd.com',
+                password: '12345'
+            }
+            await _userAuthenticationService.executeLogin(new UserAuthModel({
+                email: user.email,
+                password: user.password
+            }));
+        } catch (e) {
+            expect(e.response.message.code).toBe('email_not_found');
         }
-        const message = _userAuthenticationService.ExecuteLogin(new UserAuthModel(user)).catch(err => err.message);
-        expect(await message)
-            .toEqual('El usuario no existe');
+
 
     });
 
     it("It should be fail if the user exists but the password is incorrect", async () => {
-        const _userAuthenticationService: UserAuthenticationService = new UserAuthenticationService(null, {
-            UserAlreadyExists: jest.fn(async (email, dni) => email == 'asd@asd.com' && dni == '1234567890'),
-            UserAlreadyExistsAndReturn: jest.fn(async (email) => new User()),
-            VerifyBalancaCapacity: jest.fn((balance : number, userBalance : number) => 0)
-        }, {
-            validation: jest.fn((credentials: UserAuthModel, password: string) => false)
-        });
-        const user: LoginDTO = {
-            email: '',
-            password: ''
+        try {
+            const _userAuthenticationService: UserAuthenticationService = new UserAuthenticationService(null, {
+                userAlreadyExists: jest.fn(async (email, dni) => { }),
+                userAlreadyExistsAndReturn: jest.fn(async (email) => new User()),
+                userHaveBalance: jest.fn((balance: number, userBalance: number) => { }),
+                validationPassword: jest.fn((credentials: UserAuthModel, password: string) => { throw new BussinessExcp({ code: 'invalid_password' }) })
+            });
+            const user: LoginDTO = {
+                email: 'asd@asd.com',
+                password: '12345'
+            }
+            await _userAuthenticationService.executeLogin(new UserAuthModel({
+                email: user.email,
+                password: user.password
+            }));
+        } catch (e) {
+            expect(e.response.message.code).toBe('invalid_password');
         }
-        const message = _userAuthenticationService.ExecuteLogin(new UserAuthModel(user)).catch(err => err.message);
-        expect(await message)
-            .toEqual('Contraseña incorrecta');
+
     });
 })

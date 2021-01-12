@@ -5,10 +5,9 @@ import { AppointmentModel } from "../Model/AppointmentModel";
 
 export abstract class AppointmentRepository
 {
-    abstract createAppointment(appointment : AppointmentModel) : Promise<{}>;
+    abstract createAppointment(appointment : AppointmentModel);
     abstract listAppointments(parameters :{}) : Promise<Appointments[]>;
-    abstract takeAppointment(appointment : Appointments, user : User) : Promise<{}>;
-    abstract cancelAppointment(appointment : Appointments, user : User) : Promise<{}>;
-    abstract cancelAppointmentWithoutUser(appointment : Appointments) : Promise<{}>;
-    abstract deleteAppointment(appointmentId : number) : Promise<{}>;
+    abstract takeAppointment(appointment : Appointments, user : User);
+    abstract cancelAppointment(appointment : Appointments, user : User);
+    abstract deleteAppointment(appointmentId : number) ;
 }

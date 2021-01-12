@@ -11,6 +11,6 @@ export abstract class AppointmentDBRepository
     abstract findAppointmentByIdAndStatus(idAppointment : number) : Promise<Appointments>;
     abstract findAppointmentByIds(idAppointment : number, idUser : number) : Promise<Appointments>;
     abstract findAppointmentById(idAppointment : number) : Promise<Appointments>;
-    abstract findAppointmentByIdAndDelete(idAppointment : number) : Promise<{}>;
-    abstract putAppointment(appointment : Appointments, Action : ActionType, user : User) : Promise<{}>;
+    abstract findAppointmentByIdAndDelete(idAppointment : number);
+    abstract putAppointment(appointment : Appointments, Action : ActionType, user : User);
 }

@@ -1,22 +1,20 @@
 import { Module } from '@nestjs/common';
-import { APP_GUARD } from '@nestjs/core';
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { createAppointmentCase } from 'src/application/Appointments/UseCases/createAppointmentCase';
-import { AppointmentService } from 'src/domain/Appointments/Services/AppointmentService';
-import { ExceptionModel } from '../Exceptions/exceptions.model';
-import { MergeExceptionRepository } from '../Exceptions/MergeProviders/MergeProviders';
+import { CommandAppointmentCase } from 'src/application/Appointments/UseCases/command/CommandAppointmentCase';
+import { QueryAppointmentCase } from 'src/application/Appointments/UseCases/query/QueryAppointmentCase';
+import { AppointmentService } from 'src/domain/Appointments/Services/AppointmentCommandService/AppointmentService';
+import { AppointmentBussinessLogic } from 'src/domain/Appointments/Validations/AppointmentsBussinessLogic';
+import { PaymentsModule } from '../Payments/payments.module';
 import { User } from '../Users/EntityManager/user.entity';
-import { MergeDB } from '../Users/MergedProviders/MergeProvider';
-import { AuthGuard } from './adapters/Guard/AuthGuard';
+import { MergeDB, MergeValidations } from '../Users/MergedProviders/MergeProvider';
+import { AppointmentDBAdapter } from './adapters/Command/AppointmentDBAdapter';
 import { AppointmentController } from './controllers/appointment.controller';
 import { Appointments } from './DBEntities/appointment.entity';
-import { MergeAdapter, MergeDBRepository, MergeValidations } from "./MergeProviders/mergeAppointment";
+import { MergeAdapter, MergeDBRepository, MergeQueryRepository, MergeAppointmentsValidations } from "./MergeProviders/mergeAppointment";
 @Module({
-    imports: [ExceptionModel,TypeOrmModule.forFeature([Appointments]),TypeOrmModule.forFeature([User])],
+    imports: [TypeOrmModule.forFeature([Appointments]),TypeOrmModule.forFeature([User]), PaymentsModule],
     controllers: [AppointmentController],
-    providers: [createAppointmentCase,AppointmentService, {
-        provide: APP_GUARD,
-        useClass: AuthGuard
-    }, MergeAdapter, MergeDBRepository, MergeValidations, MergeDB]
+    providers: [CommandAppointmentCase,QueryAppointmentCase,AppointmentService,AppointmentBussinessLogic, MergeValidations,
+         AppointmentDBAdapter,MergeAppointmentsValidations,MergeAdapter, MergeDBRepository, MergeDB, MergeQueryRepository]
 })
 export class AppointmentModule {}

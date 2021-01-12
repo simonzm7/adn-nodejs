@@ -1,9 +1,11 @@
+import { AppointmentBussinessLogicRepository } from "src/domain/Appointments/Repository/AppointmentBussinessLogicRepository";
 import { AppointmentDBRepository } from "src/domain/Appointments/Repository/AppointmentDBRepository";
+import { AppointmentQueryRepository } from "src/domain/Appointments/Repository/AppointmentQueryRepository";
 import { AppointmentRepository } from "src/domain/Appointments/Repository/AppointmentRepository";
-import { AppointmentValidationRepository } from "src/domain/Appointments/Repository/AppointmentValidationRepository";
-import { AppointmentDBAdapter } from "../adapters/AppointmentDBAdapter";
-import { AppointmentAdapter } from "../adapters/AppointmentsAdapter";
-import { AppointmentValidationAdapter } from "../adapters/AppointmentValidationAdapter";
+import { AppointmentBussinessLogic } from "src/domain/Appointments/Validations/AppointmentsBussinessLogic";
+import { AppointmentDBAdapter } from "../adapters/Command/AppointmentDBAdapter";
+import { AppointmentAdapter } from "../adapters/Command/AppointmentsAdapter";
+import { AppointmentQueryAdapter } from "../adapters/Query/AppointmentQueryAdapter";
 
 
 export const MergeAdapter = {
@@ -16,7 +18,13 @@ export const MergeDBRepository = {
     useClass: AppointmentDBAdapter
 }
 
-export const MergeValidations = {
-    provide: AppointmentValidationRepository,
-    useClass: AppointmentValidationAdapter
+export const MergeQueryRepository = {
+    provide: AppointmentQueryRepository,
+    useClass: AppointmentQueryAdapter
+
+}
+
+export const MergeAppointmentsValidations = {
+    provide: AppointmentBussinessLogicRepository,
+    useClass: AppointmentBussinessLogic
 }
