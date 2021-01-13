@@ -2,7 +2,7 @@ import { CommandCreateAppointment } from 'src/application/Appointments/command/c
 import { QueryAppointmentHandler } from 'src/application/Appointments/query/query-appointment-handler';
 import { ActionType } from 'src/domain/Appointments/Enums/ActionType';
 import { Appointment } from 'src/domain/Appointments/Model/Appointment';
-import { AppointmentSelectorModel } from 'src/domain/Appointments/Model/AppointmentSelectorModel';
+import { AppointmentSelector } from 'src/domain/Appointments/Model/AppointmentSelector';
 import { AppointmentService } from 'src/domain/Appointments/Services/AppointmentCommandService/AppointmentService'
 import { BussinessExcp } from 'src/domain/Exceptions/BussinessExcp';
 import { AppointmentEntity } from 'src/infraestructure/Appointments/Entity/appointment.entity';
@@ -156,7 +156,7 @@ describe('Domain - Appointment Service', () => {
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
 
-            const selectorModel: AppointmentSelectorModel = new AppointmentSelectorModel(appointmentDto);
+            const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
             await _appointmentService.executeSelector(selectorModel);
         } catch (e) {
             expect(e.response.message.code).toBe('auto_appointment');
@@ -184,7 +184,7 @@ describe('Domain - Appointment Service', () => {
                 verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
-            const selectorModel: AppointmentSelectorModel = new AppointmentSelectorModel(appointmentDto);
+            const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
             await _appointmentService.executeSelector(selectorModel);
         } catch (e) {
             expect(e.response.message.code).toBe('invalid_appointment_hour');
@@ -213,7 +213,7 @@ describe('Domain - Appointment Service', () => {
                 verifyAppointmentStatusAndReturn: jest.fn(async () => { throw new BussinessExcp({ code: 'appointment_not_exists' }) }),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
-            const selectorModel: AppointmentSelectorModel = new AppointmentSelectorModel(appointmentDto);
+            const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
             await _appointmentService.executeSelector(selectorModel);
         } catch (e) {
             expect(e.response.message.code).toBe('appointment_not_exists');
@@ -241,7 +241,7 @@ describe('Domain - Appointment Service', () => {
                 verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
-            const selectorModel: AppointmentSelectorModel = new AppointmentSelectorModel(appointmentDto);
+            const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
             await _appointmentService.executeSelector(selectorModel);
         } catch (e) {
             expect(e.response.message.code).toBe('appointment_select_expired');
@@ -271,7 +271,7 @@ describe('Domain - Appointment Service', () => {
                 verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
-            const selectorModel: AppointmentSelectorModel = new AppointmentSelectorModel(appointmentDto);
+            const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
             await _appointmentService.executeSelector(selectorModel);
         } catch (e) {
             expect(e.response.message.code).toBe('insuficient_balance');
@@ -299,7 +299,7 @@ describe('Domain - Appointment Service', () => {
                 verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
-            const selectorModel: AppointmentSelectorModel = new AppointmentSelectorModel(appointmentDto);
+            const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
             await _appointmentService.executeSelector(selectorModel);
         } catch (e) {
             expect(e.response.message.code).toBe('invalid_dni_day');

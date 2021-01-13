@@ -1,17 +1,12 @@
 
 
-interface ISelectorModel {
-    appointmentId: number;
-    week: string;
-    userId: number;
-}
-export class AppointmentSelectorModel {
+export class AppointmentSelector {
 
     private readonly appointmentId: number;
     private readonly week: string;
     private readonly userId: number;
     private appointmentDate: Date;
-    constructor({ appointmentId, week, userId }: ISelectorModel) {
+    constructor({ appointmentId, week, userId }) {
         this.appointmentId = appointmentId;
         this.week = week;
         this.userId = userId;

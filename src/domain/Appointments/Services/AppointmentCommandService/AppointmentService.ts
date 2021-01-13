@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { AppointmentEntity } from 'src/infraestructure/Appointments/Entity/appointment.entity';
 import { UserEntity } from 'src/infraestructure/Users/Entity/user.entity';
 import { Appointment } from '../../Model/Appointment';
-import { AppointmentSelectorModel } from '../../Model/AppointmentSelectorModel';
+import { AppointmentSelector } from '../../Model/AppointmentSelector';
 import { ActionType } from '../../Enums/ActionType';
 import { UsersValidationsRepository } from 'src/domain/UserActions/Users/port/Validations/repository/user-validations-repository';
 import { DateValidationRepository } from '../../port/Validations/date-validation-repository';
@@ -28,7 +28,7 @@ export class AppointmentService {
         await this.appointmentDBRepository.createAppointment(appointment);
     };
 
-    executeSelector = async (selectorModel: AppointmentSelectorModel) => {
+    executeSelector = async (selectorModel: AppointmentSelector) => {
 
         await this.userAppointmentValidation.verifyAutoSelect(selectorModel.getUserId, selectorModel.getAppointmentId);
         await this.dateValidationRepository.verifyIfCustomerHaveAppointment(selectorModel.getUserId, selectorModel.getAppointmentDate);

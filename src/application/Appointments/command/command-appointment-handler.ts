@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Appointment } from 'src/domain/Appointments/Model/Appointment';
-import { AppointmentSelectorModel } from 'src/domain/Appointments/Model/AppointmentSelectorModel';
+import { AppointmentSelector } from 'src/domain/Appointments/Model/AppointmentSelector';
 import { AppointmentService } from 'src/domain/Appointments/Services/AppointmentCommandService/AppointmentService';
 import { CommandCreateAppointment } from './command-create-appointment'
 import { CommandSelectorAppointment } from './command-selector-appointment';
@@ -19,7 +19,7 @@ export class CommandAppointmentHandler {
     };
 
     executeSelector = async (dto: CommandSelectorAppointment) => {
-        await this.appointmentService.executeSelector(new AppointmentSelectorModel({
+        await this.appointmentService.executeSelector(new AppointmentSelector({
             appointmentId : dto.AppointmentId,
             week: dto.week,
             userId: dto.userId
