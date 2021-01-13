@@ -1,10 +1,9 @@
-import { BussinessExcp } from "../Exceptions/BussinessExcp";
-import { IMethods } from "../UserActions/Users/repositories/Validations/IMethods";
+import { BussinessExcp } from '../Exceptions/BussinessExcp';
 
-class GlobalModelValidations implements IMethods {
+class GlobalValidations {
 
     private readonly regex = {
-        email:  /^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$/,
+        email:  /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
         stringOnly: /^[a-zA-ZÀ-ÿ\s]{1,40}$/,
         numberOnly: /^[0-9]+$/,
         booleanOnly: /^(true|false|1|0)$/,
@@ -46,9 +45,9 @@ class GlobalModelValidations implements IMethods {
     };
 
     isHigherOrLower = (value, conditions: { min: number, max: number }) => {
-        if (parseInt(value) < conditions.min)
+        if ((+value) < conditions.min)
             throw new BussinessExcp({ code: 'invalid_minimum_appointment_cost', allowedCost: conditions.min });
-        if (parseInt(value) > conditions.max)
+        if ((+value) > conditions.max)
             throw new BussinessExcp({ code: 'invalid_maximum_appointment_cost', allowedCost: conditions.max });
     }
     isString = (value: string, type: string) => {
@@ -83,4 +82,4 @@ class GlobalModelValidations implements IMethods {
 }
 
 
-export default new GlobalModelValidations;
+export default new GlobalValidations;

@@ -1,5 +1,5 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
-import { UnauthorizedExcp } from "src/domain/Exceptions/UnauthorizedExcp";
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedExcp } from 'src/domain/Exceptions/UnauthorizedExcp';
 
 
 @Injectable()

@@ -1,18 +1,23 @@
-import { Injectable } from "@nestjs/common";
-import { User } from "src/infraestructure/Users/EntityManager/user.entity";
-import { UserBussinessLogicRepository } from "../../Users/repositories/Users/UserBussinessLogicRepository";
-import UserAuthModel from "../Model/UserAuthModel";
-import { LoginRepository } from "../Repository/LoginRepository";
+import { Injectable } from '@nestjs/common';
+import { SuccessExcp } from 'src/domain/Exceptions/SuccessExcp';
+import { UserEntity } from 'src/infraestructure/Users/Entity/user.entity';
+import { CredentialsValidationsRepository } from '../../Users/port/Validations/repository/credentials-validations-repository';
+import { UsersValidationsRepository } from '../../Users/port/Validations/repository/user-validations-repository';
+import { UserAuth } from '../Model/UserAuth';
 
 @Injectable()
-export default class UserAuthenticationService {
-    constructor(private readonly loginRepository: LoginRepository,
-        private readonly userBussinessLogic: UserBussinessLogicRepository
+export class UserAuthenticationService {
+    constructor(
+        private readonly userValidations: UsersValidationsRepository,
+        private readonly credentialsValidations: CredentialsValidationsRepository
     ) { }
 
-    executeLogin = async (credentials: UserAuthModel) => {
-        const user : User = await this.userBussinessLogic.userAlreadyExistsAndReturn(credentials.getEmail);
-        this.userBussinessLogic.validationPassword(credentials, user.password);
-        await this.loginRepository.LoginUser(user.userId);
+    executeLogin = async (credentials: UserAuth) => {
+        const user: UserEntity = await this.userValidations.userAlreadyExistsAndReturn(credentials.getEmail);
+        this.credentialsValidations.validationPassword(credentials, user.password);
+        throw new SuccessExcp({
+            code: 'user_authenticated',
+            userid: user.userId
+        });
     }
 }

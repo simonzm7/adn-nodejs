@@ -1,22 +1,22 @@
-import { HttpStatus, INestApplication } from "@nestjs/common"
+import { HttpStatus, INestApplication } from '@nestjs/common'
 import * as request from 'supertest';
-import { Test } from "@nestjs/testing";
-import { createSandbox, SinonStubbedInstance } from "sinon";
-import { QueryPaymentsUseCase } from "src/application/Payments/Query/QueryPaymentsUseCase";
-import { PaymentsController } from "src/infraestructure/Payments/Controllers/payments.controller";
-import { createStubObj } from "test/util/createObjectStub";
+import { Test } from '@nestjs/testing';
+import { createSandbox, SinonStubbedInstance } from 'sinon';
+import { PaymentsController } from 'src/infraestructure/Payments/Controllers/payments.controller';
+import { createStubObj } from 'test/util/createObjectStub';
+import { QueryPaymentsHandler } from 'src/application/Payments/Query/query-appointment-handler';
 
 
 const sinonSandbox = createSandbox();
 describe('Payments Unit Tests', () => {
 
     let app: INestApplication;
-    let queryPaymentsUseCase : SinonStubbedInstance<QueryPaymentsUseCase>;
+    let queryPaymentsUseCase : SinonStubbedInstance<QueryPaymentsHandler>;
     beforeAll(async () => {
-        queryPaymentsUseCase = createStubObj<QueryPaymentsUseCase>(['executeQueryUserPayments'], sinonSandbox);
+        queryPaymentsUseCase = createStubObj<QueryPaymentsHandler>(['executeQueryUserPayments'], sinonSandbox);
         let moduleRef = await Test.createTestingModule({
             controllers: [PaymentsController],
-            providers: [{provide: QueryPaymentsUseCase, useValue: queryPaymentsUseCase}]
+            providers: [{provide: QueryPaymentsHandler, useValue: queryPaymentsUseCase}]
         }).compile();
 
         app = moduleRef.createNestApplication();

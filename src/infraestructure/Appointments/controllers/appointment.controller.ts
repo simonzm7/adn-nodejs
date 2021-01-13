@@ -1,33 +1,33 @@
-import { Controller, Post, Get, Put, Body, Req, Param, UsePipes, ValidationPipe, Delete, UseGuards, Res, HttpStatus } from "@nestjs/common";
-import { CommandAppointmentCase } from "src/application/Appointments/UseCases/command/CommandAppointmentCase";
-import { QueryAppointmentCase } from "src/application/Appointments/UseCases/query/QueryAppointmentCase";
-import { AppointmentDTO } from "src/domain/Appointments/Repository/DTO/AppointmentDTO";
-import { AppointmentSelectorDTo } from "src/domain/Appointments/Repository/DTO/AppointmentSelectorDTO";
-import { LessThan, Not } from "typeorm";
-import { AuthGuard } from "../adapters/Guard/AuthGuard";
-import { Appointments } from "../DBEntities/appointment.entity";
+import { Controller, Post, Get, Put, Body, Req, Param, UsePipes, ValidationPipe, Delete, UseGuards, Res, HttpStatus } from '@nestjs/common';
+import { CommandAppointmentHandler } from 'src/application/Appointments/command/command-appointment-handler';
+import { CommandCreateAppointment } from 'src/application/Appointments/command/command-create-appointment';
+import { CommandSelectorAppointment } from 'src/application/Appointments/command/command-selector-appointment';
+import { QueryAppointmentHandler } from 'src/application/Appointments/query/query-appointment-handler';
+import { LessThan, Not } from 'typeorm';
+import { AuthGuard } from '../adapters/Guard/AuthGuard';
+import { AppointmentEntity } from '../Entity/appointment.entity';
 
 @Controller('api/appointments')
 @UseGuards(AuthGuard)
 export class AppointmentController {
-   constructor(private readonly queryAppointment: QueryAppointmentCase,
-      private readonly commandAppointment: CommandAppointmentCase) { }
+   constructor(private readonly queryAppointment: QueryAppointmentHandler,
+      private readonly commandAppointment: CommandAppointmentHandler) { }
 
    @Get()
-   async getAvailableAppointments(@Res() res, @Req() req): Promise<Appointments[]> {
+   async getAvailableAppointments(@Res() res, @Req() req): Promise<AppointmentEntity[]> {
       return res.status(HttpStatus.OK).json({
          message: await this.queryAppointment.executeList()
       });
-   }
+   };
    @Get('me')
-   async getMyAppointments(@Res() res, @Req() req): Promise<Appointments[]> {
+   async getMyAppointments(@Res() res, @Req() req): Promise<AppointmentEntity[]> {
       return res.status(HttpStatus.OK).json({
          message: await this.queryAppointment.executeMyList([{ idUser: req.headers.userid }])
       });
-   }
+   };
 
    @Get('agenda')
-   async getDoctorAgenda(@Res() res, @Req() req): Promise<Appointments[]> {
+   async getDoctorAgenda(@Res() res, @Req() req): Promise<AppointmentEntity[]> {
       return res.status(HttpStatus.OK).json({
          message: await this.queryAppointment.executeAgendaList([{
             idDoctor: req.headers.userid,
@@ -40,26 +40,29 @@ export class AppointmentController {
          }
          ])
       });
-   }
+   };
 
    @UsePipes(new ValidationPipe({ transform: true }))
    @Post()
-   async create(@Body() appointment: AppointmentDTO, @Req() req, @Res() res) {
+   async create(@Body() appointment: CommandCreateAppointment, @Req() req) {
       appointment.idDoctor = req.headers.userid;
       await this.commandAppointment.executeCreate(appointment);
-   }
+   };
    @UsePipes(new ValidationPipe({ transform: true }))
    @Put()
-   async selectAppointment(@Body() dto: AppointmentSelectorDTo, @Req() req, @Res() res) {
+   async selectAppointment(@Body() dto: CommandSelectorAppointment, @Req() req, @Res() res) {
       dto.userId = req.headers.userid;
       await this.commandAppointment.executeSelector(dto);
-   }
+   };
+
    @Put(':id')
-   async cancelAppointment(@Param() param, @Req() req, @Res() res) {
-      await this.commandAppointment.executeCanceller(parseInt(param.id), req.headers.userid);
-   }
+   async cancelAppointment(@Param() param, @Req() req) {
+      await this.commandAppointment.executeCanceller(+(param.id), req.headers.userid);
+   };
+
+
    @Delete(':id')
-   async deleteAppointment(@Param() param, @Req() req, @Res() res) {
-      await this.commandAppointment.executeDeletor(parseInt(param.id), req.headers.userid);
-   }
+   async deleteAppointment(@Param() param, @Req() req){
+      await this.commandAppointment.executeDeletor(+(param.id), req.headers.userid);
+   };
 }

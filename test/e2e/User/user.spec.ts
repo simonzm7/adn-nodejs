@@ -1,35 +1,48 @@
 import * as request from 'supertest';
-import { Test } from "@nestjs/testing";
-import { INestApplication, HttpStatus } from "@nestjs/common";
-import { createSandbox, SinonStubbedInstance } from "sinon";
-import { abstractUser } from 'src/domain/UserActions/Users/repositories/Users/abstractUser';
+import { Test } from '@nestjs/testing';
+import { INestApplication, HttpStatus } from '@nestjs/common';
+import { createSandbox, SinonStubbedInstance } from 'sinon';
 import { createStubObj } from 'test/util/createObjectStub';
 import { UserController } from 'src/infraestructure/Users/controllers/user.controller';
-import { UserRegisterManagment } from 'src/application/Users/UseCases/UserRegisterManagment';
 import { UserService } from 'src/domain/UserActions/Users/services/UserService';
-import { UserDTO } from 'src/domain/UserActions/Users/repositories/Users/DTO/UserDTO';
 import { BalanceService } from 'src/domain/UserActions/Users/services/BalanceService';
+import { UserHandler } from 'src/application/Users/Command/user-hander';
+import { UserCommand } from 'src/application/Users/Command/user-command';
+import { RepositoryUser } from 'src/domain/UserActions/Users/port/User/repository/repository-user';
+import { UsersValidationsRepository } from 'src/domain/UserActions/Users/port/Validations/repository/user-validations-repository';
+import { OperationsValidationsRepository } from 'src/domain/UserActions/Users/port/Validations/repository/operations-validations-repository';
+import { RepositoryPayments } from 'src/domain/Payments/Port/repository/repository-payments';
 import { BussinessExcp } from 'src/domain/Exceptions/BussinessExcp';
-import { UserBussinessLogicRepository } from 'src/domain/UserActions/Users/repositories/Users/UserBussinessLogicRepository';
-import { User } from 'src/infraestructure/Users/EntityManager/user.entity';
+import { UserEntity } from 'src/infraestructure/Users/Entity/user.entity';
 
 
 const sinonSandbox = createSandbox();
 describe('UserController', () => {
 
     let app: INestApplication;
-    let userRepository: SinonStubbedInstance<abstractUser>;
-    let userBussinessLogicRepository: SinonStubbedInstance<UserBussinessLogicRepository>;
+    let userRepository: SinonStubbedInstance<RepositoryUser>;
+    let userValidationRepository: SinonStubbedInstance<UsersValidationsRepository>;
+    let operatinsValidationRepository: SinonStubbedInstance<OperationsValidationsRepository>;
+    let paymentsRepository : SinonStubbedInstance<RepositoryPayments>;
     beforeAll(async () => {
-        userRepository = createStubObj<abstractUser>(['createUser', 'updateBalance'], sinonSandbox);
-        userBussinessLogicRepository = createStubObj<UserBussinessLogicRepository>(
-            ['userAlreadyExists', 'userAlreadyExistsAndReturn', 'userHaveBalance', 'validationPassword'], sinonSandbox);
+        userRepository = createStubObj<RepositoryUser>(['createOne', 'updateUser'], sinonSandbox);
+        userValidationRepository = createStubObj<UsersValidationsRepository>(
+            ['userAlreadyExists', 'userAlreadyExistsAndReturn'], sinonSandbox);
+        operatinsValidationRepository = createStubObj<OperationsValidationsRepository>(
+            ['addBalance', 'userHaveBalance'], sinonSandbox
+        );
+        paymentsRepository = createStubObj<RepositoryPayments>(
+            ['createPayment', 'deletePayment'], sinonSandbox
+        );
         const moduleRef = await Test.createTestingModule({
             controllers: [UserController],
-            providers: [UserRegisterManagment, UserService, BalanceService,
-                { provide: abstractUser, useValue: userRepository },
-                { provide: UserBussinessLogicRepository, useValue: userBussinessLogicRepository }]
-        }).compile();
+            providers: [UserHandler, UserService, BalanceService,
+                { provide: RepositoryUser, useValue: userRepository },
+                { provide: UsersValidationsRepository, useValue: userValidationRepository },
+                { provide: OperationsValidationsRepository, useValue: operatinsValidationRepository },
+            {provide: RepositoryPayments, useValue: paymentsRepository}]
+                
+            }).compile();
 
         app = moduleRef.createNestApplication();
         await app.init();
@@ -42,7 +55,7 @@ describe('UserController', () => {
 
     it('It should be fail if the email not is and email', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@@asd.com',
             password: '12345',
             firstname: 'firstname',
@@ -58,7 +71,7 @@ describe('UserController', () => {
 
     it('It should be fail if the password length is less than 4', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '123',
             firstname: 'firstname',
@@ -74,7 +87,7 @@ describe('UserController', () => {
 
     it('It should be fail if the password length is higher than 4', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '1234567890123456789012345678901',
             firstname: 'firstname',
@@ -90,7 +103,7 @@ describe('UserController', () => {
 
     it('It should be fail if the firstname not is a string only', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'asd@',
@@ -108,7 +121,7 @@ describe('UserController', () => {
 
     it('It should be fail if the lastname not is a string only', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'asd',
@@ -126,7 +139,7 @@ describe('UserController', () => {
 
     it('It should be fail if the dni not is a numeric only', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'asd',
@@ -142,7 +155,7 @@ describe('UserController', () => {
 
     it('It should be fail if the dni length is less than 10', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'asd',
@@ -158,7 +171,7 @@ describe('UserController', () => {
 
     it('It should be fail if the dni length is higher than 10', async () => {
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'asd',
@@ -174,7 +187,7 @@ describe('UserController', () => {
 
     it('It should be fail if the role not is a allowed role', async () => {
 
-        const user : UserDTO = {
+        const user : UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'asd',
@@ -189,9 +202,9 @@ describe('UserController', () => {
     });
 
     it('should be faild if the user do not exists', async () => {
-        userBussinessLogicRepository.userAlreadyExists.throws(new BussinessExcp({ code: 'user_already_exists' }));
+        userValidationRepository.userAlreadyExists.throws(new BussinessExcp({ code: 'user_already_exists' }));
 
-        const user: UserDTO = {
+        const user: UserCommand = {
             email: 'asd@asd.com',
             password: '12345',
             firstname: 'juan',
@@ -215,7 +228,7 @@ describe('UserController', () => {
         const user : {} = {
             balance: 1000000
         }
-        userBussinessLogicRepository.userAlreadyExistsAndReturn.throws(new BussinessExcp({code: 'email_not_found'}));
+        userValidationRepository.userAlreadyExistsAndReturn.throws(new BussinessExcp({code: 'email_not_found'}));
         const response = await request(app.getHttpServer())
         .put('/api/user').set({userid: 1}).send(user)
         .expect(HttpStatus.BAD_REQUEST);
@@ -223,9 +236,9 @@ describe('UserController', () => {
         expect(response.body.message.code).toBe('email_not_found');
     });
 
-    it("It should be fail if the user exceds the balance capacity", async () => {
+    it('It should be fail if the user exceds the balance capacity', async () => {
 
-        const user : User = {
+        const user : UserEntity = {
             userId: 1,
             email: 'asd@asd.com',
             password: '1234',
@@ -235,8 +248,8 @@ describe('UserController', () => {
             balance: 0,
             role: 'Customer'
         }
-        userBussinessLogicRepository.userAlreadyExistsAndReturn.returns(Promise.resolve(user));
-        userBussinessLogicRepository.userHaveBalance.throws(new BussinessExcp({code: 'invalid_balance'}));
+        userValidationRepository.userAlreadyExistsAndReturn.returns(Promise.resolve(user));
+        operatinsValidationRepository.userHaveBalance.throws(new BussinessExcp({code: 'invalid_balance'}));
         const response = await request(app.getHttpServer())
         .put('/api/user').set({userid: 1}).send(user)
         .expect(HttpStatus.BAD_REQUEST);

@@ -1,16 +1,15 @@
 import { Module }  from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CommandsPaymentsUseCase } from 'src/application/Payments/Command/CommandsPaymentsUseCase';
-import { QueryPaymentsUseCase } from 'src/application/Payments/Query/QueryPaymentsUseCase';
-import { PaymentService } from 'src/domain/Payments/Services/PaymentService';
+import { QueryPaymentsHandler } from 'src/application/Payments/Query/query-appointment-handler';
 import { PaymentsController } from './Controllers/payments.controller';
-import { Payments } from './Entities/payment.entity';
-import { PaymentsMerge } from './MergedProviders/MergedProviders';
+import { PaymentsEntity } from './Entity/payment.entity';
+import { DaoPaymentsProvider } from './Providers/dao/dao-payment.provider';
+import { RepositoryPaymentsProvider } from './Providers/repository/repository-payments.provider';
 
 @Module({
-     imports: [TypeOrmModule.forFeature([Payments])],
+     imports: [TypeOrmModule.forFeature([PaymentsEntity])],
      controllers: [PaymentsController],
-     providers: [QueryPaymentsUseCase, PaymentService, CommandsPaymentsUseCase,PaymentsMerge],
-     exports: [TypeOrmModule.forFeature([Payments]), PaymentService, CommandsPaymentsUseCase, PaymentsMerge]
+     providers: [QueryPaymentsHandler, DaoPaymentsProvider, RepositoryPaymentsProvider],
+     exports: [TypeOrmModule.forFeature([PaymentsEntity]), RepositoryPaymentsProvider]
 })
 export class PaymentsModule{}

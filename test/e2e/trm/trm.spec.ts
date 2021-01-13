@@ -1,26 +1,25 @@
-import { HttpStatus, INestApplication } from "@nestjs/common"
+import { HttpStatus, INestApplication } from '@nestjs/common'
 import * as request from 'supertest';
-import { Test } from "@nestjs/testing";
-import { createSandbox, SinonStubbedInstance } from "sinon";
-import { TrmQueryUseCase } from "src/application/Trm/Query/TrmQueryUseCase";
-import { TrmController } from "src/infraestructure/TRM/controllers/trm.controller";
-import { createStubObj } from "test/util/createObjectStub";
-import { TrmAdapter } from "src/infraestructure/TRM/adapters/TrmAdapter";
-import { TrmRepository } from "src/domain/Trm/Repository/TrmRepository";
+import { Test } from '@nestjs/testing';
+import { createSandbox, SinonStubbedInstance } from 'sinon';
+import { TrmController } from 'src/infraestructure/TRM/controllers/trm.controller';
+import { createStubObj } from 'test/util/createObjectStub';
+import { TrmRepository } from 'src/domain/Trm/port/TrmRepository';
+import { QueryTrmHandler } from 'src/application/Trm/Query/query-trm-handler';
 
 
 const sinonSandbox = createSandbox();
 describe('TRM Unit Tests', () => {
 
     let app: INestApplication;
-    let trmQueryUseCase : SinonStubbedInstance<TrmQueryUseCase>;
+    let trmQueryUseCase : SinonStubbedInstance<QueryTrmHandler>;
     let trmRepository : SinonStubbedInstance<TrmRepository>;
     beforeAll(async () => {
-        trmQueryUseCase = createStubObj<TrmQueryUseCase>(['executeQuery'], sinonSandbox);
+        trmQueryUseCase = createStubObj<QueryTrmHandler>(['executeQuery'], sinonSandbox);
         trmRepository = createStubObj<TrmRepository>(['getTrmDollar'], sinonSandbox);
         let moduleRef = await Test.createTestingModule({
             controllers: [TrmController],
-            providers: [{provide: TrmQueryUseCase, useValue: trmQueryUseCase},
+            providers: [{provide: QueryTrmHandler, useValue: trmQueryUseCase},
             {provide: TrmRepository, useValue: trmRepository}]
         }).compile();
 

@@ -1,11 +1,11 @@
-import { Module } from "@nestjs/common";
-import { TrmQueryUseCase } from "src/application/Trm/Query/TrmQueryUseCase";
-import { TrmController } from "./controllers/trm.controller";
-import { MergeTrmAdapter } from './MergedProviders/Providers'
+import { Module } from '@nestjs/common';
+import { QueryTrmHandler } from 'src/application/Trm/Query/query-trm-handler';
+import { TrmController } from './controllers/trm.controller';
+import { MergeTrmAdapter } from './providers/dao/dao-trm.provider'
 
 
 @Module({
     controllers: [TrmController],
-    providers: [TrmQueryUseCase,MergeTrmAdapter]
+    providers: [QueryTrmHandler,MergeTrmAdapter]
 })
 export class TrmModule {}

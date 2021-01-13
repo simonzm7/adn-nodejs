@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { BussinessExcp } from 'src/domain/Exceptions/BussinessExcp';
-import { MethodType } from 'src/domain/Trm/Repository/Enums/MethodType';
+import { MethodType } from 'src/domain/Trm/port/Enums/MethodType';
 
 export interface IRequest {
     url: string;

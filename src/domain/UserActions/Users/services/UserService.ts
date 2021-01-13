@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { UserModel } from '../models/UserModel';
-import { abstractUser } from '../repositories/Users/abstractUser';
-import { UserBussinessLogicRepository } from '../repositories/Users/UserBussinessLogicRepository';
-import { UserBussinessLogic } from '../Validations/UserBussinessLogic';
+import { User } from '../models/User';
+import { RepositoryUser } from '../port/User/repository/repository-user';
+import { UsersValidationsRepository } from '../port/Validations/repository/user-validations-repository';
 
 
 @Injectable()
 export class UserService {
   constructor(
-    private readonly userRepository: abstractUser,
-    private readonly userBussinessLogic : UserBussinessLogicRepository) { }
+    private readonly userRepository: RepositoryUser,
+    private readonly userValidations : UsersValidationsRepository) { }
 
-  public async executeCreate(user: UserModel) {
-    await this.userBussinessLogic.userAlreadyExists(user.get_email, user.get_dni);
-    await this.userRepository.createUser(user);
+  public async executeCreate(user: User) {
+    await this.userValidations.userAlreadyExists(user.get_email, user.get_dni);
+    await this.userRepository.createOne(user);
   }
 
 }
