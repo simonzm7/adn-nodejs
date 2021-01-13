@@ -33,7 +33,7 @@ export class UserAppointmentValidation implements UserAppointmentValidationRepos
             throw new BussinessExcp({ code: 'email_not_found' });
         }
 
-        if (!(user.role.toLocaleLowerCase() === 'doctor')) {
+        if (user.role.toLocaleLowerCase() !== 'doctor') {
             throw new UnauthorizedExcp({ code: 'invalid_permisons' });
         }
     };
@@ -42,16 +42,13 @@ export class UserAppointmentValidation implements UserAppointmentValidationRepos
         const DNI_START = 9;
         const DNI_END = 10;
         const DIVIDER = 2;
-        if ((+(dni.substring(DNI_START, DNI_END))) % DIVIDER === 0) {
-            if (!(weekDay === WeekDays.Monday || weekDay === WeekDays.Wednesday || weekDay === WeekDays.Friday)) {
-                throw new BussinessExcp({ code: 'invalid_dni_day' });
-            }
-
+        if (((+(dni.substring(DNI_START, DNI_END))) % DIVIDER === 0)
+            && !(weekDay === WeekDays.Monday || weekDay === WeekDays.Wednesday || weekDay === WeekDays.Friday)) {
+            throw new BussinessExcp({ code: 'invalid_dni_day' });
         }
-        if ((+(dni.substring(DNI_START, DNI_END))) % DIVIDER === 1) {
-            if (!(weekDay === WeekDays.Tuesday || weekDay === WeekDays.Thursday || weekDay === WeekDays.Saturday)) {
-                throw new BussinessExcp({ code: 'invalid_dni_day' });
-            }
+        if (((+(dni.substring(DNI_START, DNI_END))) % DIVIDER === 1) &&
+            !(weekDay === WeekDays.Tuesday || weekDay === WeekDays.Thursday || weekDay === WeekDays.Saturday)) {
+            throw new BussinessExcp({ code: 'invalid_dni_day' });
         }
     };
 
@@ -65,19 +62,14 @@ export class UserAppointmentValidation implements UserAppointmentValidationRepos
     };
 
     verifyDoctorActionType = (appointment: AppointmentEntity, user: UserEntity): ActionType => {
-        if (user.role === Roles.Doctor)
-            if (appointment.idUser === -1) {
-                return ActionType.Cancel;
-            }
-            else {
-                return ActionType.CancelAndReturn;
-            }
+        if (user.role === Roles.Doctor && appointment.idUser === -1) {
+            return ActionType.Cancel;
+        }
+        return ActionType.CancelAndReturn;
     };
     verifyCustomerActionType = (appointment: AppointmentEntity, user: UserEntity): ActionType => {
-        if (user.role === Roles.Customer) {
-            if (!(appointment.idUser === user.userId)) {
-                return ActionType.CancelAndReturn;
-            }
+        if (user.role === Roles.Customer && !(appointment.idUser === user.userId)) {
+            return ActionType.CancelAndReturn;
         }
     };
 }

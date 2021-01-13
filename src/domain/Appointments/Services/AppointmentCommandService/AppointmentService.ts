@@ -42,17 +42,17 @@ export class AppointmentService {
         await this.appointmentDBRepository.updateAppointment(appointment, ActionType.Take, user);
     };
     executeCanceller = async (idAppointment: number, idUser: number) => {
-        const Appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentByParameters([
+        const appointmentEntity: AppointmentEntity = await this.appointmentValidation.verifyAppointmentByParameters([
             { idAppointment, idUser, appointmentStatus: 1 },
             { idAppointment, appointmentStatus: 0 }
         ]);
         const user: UserEntity = await this.userValidations.userAlreadyExistsAndReturn(idUser);
-        this.appointmentValidation.verifyAppointmentIsAvailable(Appointment.appointmentStatus);
-        let actionType: ActionType = ActionType.None;
-        actionType = this.userAppointmentValidation.verifyDoctorActionType(Appointment, user);
-        actionType = this.userAppointmentValidation.verifyCustomerActionType(Appointment, user);
-        Appointment.appointmentStatus = 2;
-        await this.appointmentDBRepository.updateAppointment(Appointment, actionType, user);
+        this.appointmentValidation.verifyAppointmentIsAvailable(appointmentEntity.appointmentStatus);
+        let actionType = ActionType.None;
+        actionType = this.userAppointmentValidation.verifyDoctorActionType(appointmentEntity, user);
+        actionType = this.userAppointmentValidation.verifyCustomerActionType(appointmentEntity, user);
+        appointmentEntity.appointmentStatus = 2;
+        await this.appointmentDBRepository.updateAppointment(appointmentEntity, actionType, user);
     };
 
     executeDeletor = async (appointmentId: number, userId: number) => {

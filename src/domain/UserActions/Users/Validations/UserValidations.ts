@@ -18,7 +18,9 @@ export class UserValidations implements UsersValidationsRepository {
 
     public userAlreadyExistsAndReturn = async (value: string | number): Promise<UserEntity> => {
         const user: UserEntity = await this.daoUser.findOneByEmailOrId(value);
-        if (!user) { throw new BussinessExcp({ code: 'email_not_found' }); }
+        if (!user) {
+            throw new BussinessExcp({ code: 'email_not_found' });
+        }
 
         return user;
     };

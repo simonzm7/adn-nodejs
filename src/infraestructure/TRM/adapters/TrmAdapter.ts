@@ -7,8 +7,9 @@ import { Xml } from './Handlers/Xml';
 @Injectable()
 export class TrmAdapter implements TrmRepository {
 
-    private readonly xmls : string = "<s11:Envelope xmlns:s11='http://schemas.xmlsoap.org/soap/envelope/'>\r\n<s11:Body>\r\n<ns1:queryTCRM xmlns:ns1='http://action.trm.services.generic.action.superfinanciera.nexura.sc.com.co/'>\r\n";
-    private readonly xmls2 : string = "<tcrmQueryAssociatedDate></tcrmQueryAssociatedDate>\r\n</ns1:queryTCRM>\r\n</s11:Body>\r\n</s11:Envelope>";
+    private readonly xmls : string = "<s11:Envelope xmlns:s11='http://schemas.xmlsoap.org/soap/envelope/'>\r\n<s11:Body>\r\n";
+    private readonly xmls2 : string = "<ns1:queryTCRM xmlns:ns1='http://action.trm.services.generic.action.superfinanciera.nexura.sc.com.co/'>\r\n";
+    private readonly xmls3 : string = '<tcrmQueryAssociatedDate></tcrmQueryAssociatedDate>\r\n</ns1:queryTCRM>\r\n</s11:Body>\r\n</s11:Envelope>';
     private readonly path: string = 'https://www.superfinanciera.gov.co/SuperfinancieraWebServiceTRM/TCRMServicesWebService/TCRMServicesWebService?WSDL';
     getTrmDollar = async (): Promise<{}> => {
         const resXml : string = await Requests.Instance().createRequest({
@@ -18,7 +19,7 @@ export class TrmAdapter implements TrmRepository {
                 'SOAPAction': '',
                 'Content-Type': 'text/xml'
             },
-            data: this.xmls.concat(this.xmls2),
+            data: this.xmls.concat(this.xmls2).concat(this.xmls3),
             errorCode: 'fetch_trm_error'
         });
         const value: string =  Xml.Instance().deserializeXml({ xml: resXml });

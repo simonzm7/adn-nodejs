@@ -24,13 +24,15 @@ export class Requests {
     };
 
     public createRequest = async ({ url, method, headers, data, errorCode }: IRequest) => {
-        return await axios({
-            method: method,
+        return axios({
+            method,
             url,
             headers,
             data
-        }).then((resp) => resp.data).catch(() => {
-            throw new BussinessExcp({ code: errorCode });
-        });
+        })
+            .then((resp) => resp.data)
+            .catch(() => {
+                throw new BussinessExcp({ code: errorCode });
+            });
     };
 }

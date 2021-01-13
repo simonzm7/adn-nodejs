@@ -30,8 +30,7 @@ export class AppointmentSelector {
         return this.appointmentDate;
     }
     get getWeekDay(): number {
-        const week: number = this.appointmentDate.getDay();
-        return week;
+        return this.appointmentDate.getDay();
     }
 
     get getAppointmentId(): number {

@@ -35,7 +35,7 @@ export class RepositoryUserMysql implements RepositoryUser {
             if (idAppointment) {
                 await this.repositoryPayments.deletePayment(new PaymentModel({
                     idUser: user.userId,
-                    idAppointment: idAppointment
+                    idAppointment
                 }));
             }
         });

@@ -18,11 +18,12 @@ export class AppointmentValidation implements AppointmentValidationRepository {
         }
 
         return Promise.resolve(Appointment);
-    }
+    };
 
     verifyAppointmentIsAvailable = (appointmentStatus: number) => {
         const APPOINTMENT_CANCELED_STATUS = 2;
-        if (!(appointmentStatus !== APPOINTMENT_CANCELED_STATUS)) {
+        
+        if (appointmentStatus === APPOINTMENT_CANCELED_STATUS) {
             throw new BussinessExcp('appointment_already_cancelled');
         }
     };
