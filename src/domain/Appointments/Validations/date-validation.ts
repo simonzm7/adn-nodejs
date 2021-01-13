@@ -3,10 +3,11 @@ import { BussinessExcp } from 'src/domain/Exceptions/BussinessExcp';
 import { Double } from 'typeorm';
 import { DaoAppointment } from '../port/Appointments/dao/dao-appointments';
 import { ActionType } from '../Enums/ActionType';
+import { DateValidationRepository } from '../port/Validations/date-validation-repository';
 
 
 @Injectable()
-export class DateValidation {
+export class DateValidation implements DateValidationRepository{
 
     constructor(private readonly daoAppointment: DaoAppointment) { }
 
@@ -57,6 +58,6 @@ export class DateValidation {
         const DAY: number = +DateSplited[DAY_AND_HOUR_SPLITED_INDEX];
         const HOUR: number = +Time[DAY_AND_HOUR_SPLITED_INDEX];
         const MINUTES: number = +Time[MONTH_SPLITED_INDEX];
-        return new Date(YEAR, MONTH, DAY, HOUR, MINUTES)
+        return new Date(YEAR, MONTH, DAY, HOUR, MINUTES);
     };
 }

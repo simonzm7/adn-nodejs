@@ -3,11 +3,11 @@ import { QueryTrmHandler } from 'src/application/Trm/Query/query-trm-handler';
 
 
 @Controller('api/trm')
-export class TrmController{
+export class TrmController {
 
-    constructor(private readonly trmQuery : QueryTrmHandler){}
+    constructor(private readonly trmQuery: QueryTrmHandler) { }
     @Get()
-    async getDollarTrm(){
-        return await this.trmQuery.executeQuery();
+    getDollarTrm() {
+        return this.trmQuery.executeQuery();
     }
 }

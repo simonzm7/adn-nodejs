@@ -7,7 +7,7 @@ import { CredentialsValidationsRepository } from '../port/Validations/repository
 @Injectable()
 export class CredentialsValidations implements CredentialsValidationsRepository {
     public validationPassword = (credentials: UserAuth, password: string) => {
-        if (!(credentials.getPassword === password)) {
+        if ((credentials.getPassword !== password)) {
             throw new BussinessExcp({ code: 'invalid_password' });
         }
     };

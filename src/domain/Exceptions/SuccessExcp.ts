@@ -4,6 +4,6 @@ export class SuccessExcp extends HttpException {
     constructor(message: {}) {
         super({
             message
-        }, HttpStatus.OK)
+        }, HttpStatus.OK);
     }
 }

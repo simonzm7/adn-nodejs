@@ -2,7 +2,7 @@ import { ConfigService } from '@nestjs/config';
 
 
 
-export const dbConfiguration : any = (configService: ConfigService) => ({
+export const databaseConfigFactory : any= (configService: ConfigService) => ({
     type: 'mysql',
     host: configService.get<string>('DB_HOST'),
     port: 3306,

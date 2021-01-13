@@ -6,5 +6,4 @@ export abstract class DateValidationRepository {
     public abstract verifyHourDiference(appointments: AppointmentEntity[], dateTime: Date);
     public abstract verifyIfDoctorHaveAppointment(idDoctor: number, dateTime: Date);
     public abstract verifyIfCustomerHaveAppointment(userId: number, dateTime: Date);
-    
 }

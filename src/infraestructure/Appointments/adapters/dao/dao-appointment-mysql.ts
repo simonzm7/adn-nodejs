@@ -11,14 +11,14 @@ export class DaoAppointmentMysql implements DaoAppointment {
     constructor(@InjectRepository(AppointmentEntity) private readonly appointmentEntity: Repository<AppointmentEntity>) { }
 
     public listAppointments = async (columns: [], parameters: {}[]): Promise<{}[]> => {
-        return await this.appointmentEntity.find({
+        return this.appointmentEntity.find({
             select: columns,
             where: parameters
         });
     };
     public findAppointmentByParameters = async (parameters : {}[]) => {
-        return await this.appointmentEntity.findOne({
+        return this.appointmentEntity.findOne({
             where: parameters
         });
-    }
+    };
 }

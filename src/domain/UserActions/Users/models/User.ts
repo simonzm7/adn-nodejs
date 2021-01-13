@@ -25,7 +25,6 @@ export class User {
         const PASSWORD_MIN_LENGTH  = 4;
         const PASSWORD_MAX_LENGTH = 30;
         const DNI_MIN_AND_MAX_LENGTH = 10;
-        GlobalValidations.isEmail(this.email);
         GlobalValidations.isLength(this.password, 'password', {min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH});
         GlobalValidations.isString(this.firstname, 'firstname');
         GlobalValidations.isString(this.lastname, 'lastname');
@@ -35,20 +34,20 @@ export class User {
     };
     get getEmail(): string {
         return this.email;
-    };
+    }
     get getPassword(): string {
         return this.password;
-    };
+    }
     get getFirstName(): string {
         return this.firstname;
-    };
+    }
     get getLastName(): string {
         return this.lastname;
-    };
+    }
     get getRole(): string {
         return this.role;
-    };
+    }
     get getDni(): string {
         return this.dni;
-    };
+    }
 }

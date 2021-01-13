@@ -5,7 +5,7 @@ import { AppLogger } from '../Configuration/Logger/AppLogger';
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter<HttpException> {
     constructor(private readonly logger : AppLogger){
-        this.logger.setContext(HttpExceptionFilter.name)
+        this.logger.setContext(HttpExceptionFilter.name);
     }
     catch(exception : HttpException, host: ArgumentsHost)
     {

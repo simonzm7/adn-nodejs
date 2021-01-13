@@ -24,7 +24,7 @@ export class AppointmentSelector {
         const DAY: number = +DateSplited[DAY_AND_HOUR];
         const HOUR: number = +Time[DAY_AND_HOUR];
         const MINUTES: number = +Time[MONTH_AND_MINUTES];
-        return new Date(YEAR, MONTH, DAY, HOUR, MINUTES)
+        return new Date(YEAR, MONTH, DAY, HOUR, MINUTES);
     }
     get getAppointmentDate(): Date {
         return this.appointmentDate;

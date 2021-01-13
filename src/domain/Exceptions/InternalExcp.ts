@@ -4,6 +4,6 @@ export class InternalExcp extends HttpException {
     constructor(message: {}) {
         super({
             message
-        }, HttpStatus. INTERNAL_SERVER_ERROR)
+        }, HttpStatus. INTERNAL_SERVER_ERROR);
     }
 }

@@ -25,8 +25,10 @@ export class RepositoryUserMysql implements RepositoryUser {
             balance: 1000000,
             role: user.getRole
         })
-            .then(() => { throw new SuccessExcp({ code: 'user_created' }); });
-    };
+            .then(() => {
+                throw new SuccessExcp({ code: 'user_created' });
+            });
+    }
 
     public async updateUser(user: UserEntity, idAppointment?: number) {
         await this.userRepository.save(user).catch(async () => {
@@ -36,6 +38,6 @@ export class RepositoryUserMysql implements RepositoryUser {
                     idAppointment: idAppointment
                 }));
             }
-        })
-    };
+        });
+    }
 }

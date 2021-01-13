@@ -10,15 +10,14 @@ export class UserAuth {
         this.initializeValidations();
     }
     private initializeValidations = () => {
-        const PASSWORD_MIN_LENGTH : number = 4;
-        const PASSWORD_MAX_LENGTH : number = 30;
-        GlobalValidations.isEmail(this.email);
+        const PASSWORD_MIN_LENGTH = 4;
+        const PASSWORD_MAX_LENGTH = 30;
         GlobalValidations.isLength(this.password, 'password', { min: PASSWORD_MIN_LENGTH, max: PASSWORD_MAX_LENGTH });
     };
     get getEmail(): string {
         return this.email;
-    };
+    }
     get getPassword(): string {
         return this.password;
-    };
+    }
 }

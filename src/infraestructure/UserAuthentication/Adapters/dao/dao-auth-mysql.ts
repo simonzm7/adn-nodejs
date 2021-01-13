@@ -7,7 +7,7 @@ export class DaoAuthMysql {
     constructor(private readonly daoUser: DaoUser) { }
 
     async getUser(userId: number) : Promise<UserDto>{
-        return await this.daoUser.findAndSelect(['balance', 'firstname', 'lastname', 'role'],
+        return this.daoUser.findAndSelect(['balance', 'firstname', 'lastname', 'role'],
         [{userId}]);
     }
 }

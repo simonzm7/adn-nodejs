@@ -4,7 +4,7 @@ import { HttpStatus, INestApplication } from '@nestjs/common';
 import { createSandbox, SinonStubbedInstance } from 'sinon';
 import AuthUserHandler from 'src/application/UserAuthentication/Command/auth-user-handler';
 import { createStubObj } from 'test/util/createObjectStub';
-import UserAuthenticationController from 'src/infraestructure/UserAuthentication/Controllers/auth.controller';
+import { AuthController } from 'src/infraestructure/UserAuthentication/Controllers/auth.controller';
 import { BussinessExcp } from 'src/domain/Exceptions/BussinessExcp';
 import { QueryUser } from 'src/application/UserAuthentication/Query/query-user-handler';
 import { UserAuthenticationService } from 'src/domain/UserActions/UserAuthentication/Service/UserAuthenticationService';
@@ -28,7 +28,7 @@ describe('UserAuthenticationController', () => {
             ['validationPassword'],authSandbox);
 
         const moduleRef = await Test.createTestingModule({
-            controllers: [UserAuthenticationController],
+            controllers: [AuthController],
             providers: [AuthUserHandler, UserAuthenticationService, QueryUser,
                 { provide: DaoAuth, useValue: daoAuth },
                 {provide: UsersValidationsRepository,useValue: userValidationRepository},

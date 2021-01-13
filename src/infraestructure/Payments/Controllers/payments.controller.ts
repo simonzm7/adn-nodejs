@@ -9,7 +9,7 @@ export class PaymentsController
 {
     constructor(private readonly queryUseCase : QueryPaymentsHandler) {}
     @Get()
-    async getPayments(@Req() req){
-        return await this.queryUseCase.executeQueryUserPayments(req.headers.userid);
+     getPayments(@Req() req){
+        return this.queryUseCase.executeQueryUserPayments(req.headers.userid);
     }
 }

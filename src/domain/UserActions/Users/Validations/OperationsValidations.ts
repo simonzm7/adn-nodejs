@@ -11,12 +11,12 @@ export class OperationsValidations implements OperationsValidationsRepository {
         if ((balance + userBalance) > MAX_VALUE) {
             const allowedBalance = MAX_VALUE - userBalance;
             if (allowedBalance >= 0) {
-                throw new BussinessExcp({ code: 'invalid_balance', allowedBalance: allowedBalance });
+                throw new BussinessExcp({ code: 'invalid_balance', allowedBalance });
             }
         }
     };
 
     public addBalance = (balance: number, userBalance: number): number => {
-        return (Number(balance) + Number(userBalance))
+        return (Number(balance) + Number(userBalance));
     };
 }

@@ -28,7 +28,7 @@ export class RepositoryAppointmentMysql implements AppointmentRepository {
             appointmentStatus: 0,
             idUser: -1,
             createdAt: new Date().toLocaleString()
-        })
+        });
         throw new SuccessExcp({ code: 'appointment_created' });
     };
 
@@ -60,15 +60,18 @@ export class RepositoryAppointmentMysql implements AppointmentRepository {
     };
     public deleteAppointment = async (idAppointment: number) => {
         const verify = await this.appointmentEntity.findOne({ idAppointment });
-        if (!verify){
-            throw new BussinessExcp({ code: 'appointment_not_exists' });}
+        if (!verify) {
+            throw new BussinessExcp({ code: 'appointment_not_exists' });
+        }
 
         await getConnection().createQueryBuilder()
             .delete()
             .from(AppointmentEntity)
             .where('idAppointment = :idAppointment', { idAppointment })
             .execute()
-            .catch(() => { throw new BussinessExcp({ code: 'appointment_failed_elimination' }) });
-        throw new SuccessExcp({ code: 'appointment_deleted' })
+            .catch(() => {
+                throw new BussinessExcp({ code: 'appointment_failed_elimination' });
+            });
+        throw new SuccessExcp({ code: 'appointment_deleted' });
     };
 }

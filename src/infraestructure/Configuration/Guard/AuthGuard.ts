@@ -6,11 +6,11 @@ import { UnauthorizedExcp } from 'src/domain/Exceptions/UnauthorizedExcp';
 export class AuthGuard implements CanActivate {
     private readonly regex = {
         number: /^[0-9]*$/
-    }
+    };
     canActivate(context: ExecutionContext): boolean {
         const req = context.switchToHttp().getRequest();
         if (this.regex.number.test(req.headers.userid)) {
-            return true
+            return true;
         }
         throw new UnauthorizedExcp({ code: 'user_unauthorized' });
     }

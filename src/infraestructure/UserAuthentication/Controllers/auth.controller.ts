@@ -8,7 +8,7 @@ import AuthCommand from 'src/application/UserAuthentication/Command/auth-command
 
 
 @Controller('api/auth')
-export default class UserAuthenticationController {
+export class AuthController {
     constructor(private readonly authManagment: AuthUserHandler,
         private readonly queryUser: QueryUser) { }
 
@@ -20,7 +20,7 @@ export default class UserAuthenticationController {
 
     @UseGuards(AuthGuard)
     @Get('me')
-    async IsAuthenticated(@Req() req, @Res() res) {
+    async isAuthenticated(@Req() req, @Res() res) {
         const user: UserDto = await this.queryUser.executeQuery(req.headers.userid);
         return res.status(HttpStatus.OK).json({ message: { code: 'user_me', data: user }});
     }

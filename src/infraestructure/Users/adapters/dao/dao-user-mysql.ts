@@ -11,7 +11,7 @@ export class DaoUserMysql implements DaoUser {
     constructor(@InjectRepository(UserEntity) private readonly userEntity: Repository<UserEntity>) { }
 
     public findOneByEmailAndDni = async(email: string, dni: string): Promise<UserEntity> => {
-        return await this.userEntity.findOne({
+        return this.userEntity.findOne({
             where: [
                 { email },
                 { dni }
@@ -19,7 +19,7 @@ export class DaoUserMysql implements DaoUser {
         });
     };
     public findOneByEmailOrId = async (value: string | number): Promise<UserEntity> => {
-        return await this.userEntity.findOne({
+        return this.userEntity.findOne({
             where: [
                 { email: value },
                 { userId: value }
@@ -27,13 +27,13 @@ export class DaoUserMysql implements DaoUser {
         });
     };
     public findOneByEmail = async (email: string): Promise<UserEntity> =>{
-        return await this.userEntity.findOne({ email });
+        return this.userEntity.findOne({ email });
     };
     public findOneById = async (id: number): Promise<UserEntity> => {
-        return await this.userEntity.findOne({ userId: id });
+        return this.userEntity.findOne({ userId: id });
     };
 
     public findAndSelect = async (columns : [], conditions: {}[]) : Promise<UserDto> => {
-        return await this.userEntity.findOne({select: columns, where: conditions});
+        return this.userEntity.findOne({select: columns, where: conditions});
     };
 }
