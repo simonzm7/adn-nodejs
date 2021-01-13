@@ -64,11 +64,13 @@ export class UserAppointmentValidation implements UserAppointmentValidationRepos
     verifyDoctorActionType = (appointment: AppointmentEntity, user: UserEntity): ActionType => {
         if (user.role === Roles.Doctor && appointment.idUser === -1) {
             return ActionType.Cancel;
-        }
-        return ActionType.CancelAndReturn;
+        } 
+        if (user.role === Roles.Doctor && appointment.idUser !== -1) {
+            return ActionType.CancelAndReturn;
+        } 
     };
-    verifyCustomerActionType = (appointment: AppointmentEntity, user: UserEntity): ActionType => {
-        if (user.role === Roles.Customer && !(appointment.idUser === user.userId)) {
+    verifyCustomerActionType = (appointment: AppointmentEntity, user: UserEntity) => {
+        if (appointment.idUser === user.userId) {
             return ActionType.CancelAndReturn;
         }
     };
