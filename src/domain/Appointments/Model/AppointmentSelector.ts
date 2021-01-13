@@ -13,13 +13,17 @@ export class AppointmentSelector {
         this.appointmentDate = this.structureDate();
     }
     structureDate() {
+        const TIME_INDEX  = 3;
+        const YEAR_INDEX  = 2;
+        const MONTH_AND_MINUTES = 1;
+        const DAY_AND_HOUR = 0;
         const DateSplited: string[] = this.week.split('/');
-        const Time: string[] = DateSplited[3].split(':');
-        const YEAR: number = +DateSplited[2];
-        const MONTH: number = +DateSplited[1];
-        const DAY: number = +DateSplited[0];
-        const HOUR: number = +Time[0];
-        const MINUTES: number = +Time[1];
+        const Time: string[] = DateSplited[TIME_INDEX].split(':');
+        const YEAR: number = +DateSplited[YEAR_INDEX];
+        const MONTH: number = +DateSplited[MONTH_AND_MINUTES];
+        const DAY: number = +DateSplited[DAY_AND_HOUR];
+        const HOUR: number = +Time[DAY_AND_HOUR];
+        const MINUTES: number = +Time[MONTH_AND_MINUTES];
         return new Date(YEAR, MONTH, DAY, HOUR, MINUTES)
     }
     get getAppointmentDate(): Date {

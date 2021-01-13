@@ -10,43 +10,45 @@ export class DateValidation {
 
     constructor(private readonly daoAppointment: DaoAppointment) { }
 
-    verifyAppointmentValidDate = (appointmentDate: string, type: ActionType) => {
+    public verifyAppointmentValidDate = (appointmentDate: string, type: ActionType) => {
         const appointmentDateConverted: Date = this.structureDate(appointmentDate);
         if ((new Date().getTime() > appointmentDateConverted.getTime())) {
             throw new BussinessExcp({ code: `appointment_${type}_expired` });
         }
     };
 
-    verifyIfDoctorHaveAppointment = async (idDoctor: number, dateTime: Date) => {
+    public verifyIfDoctorHaveAppointment = async (idDoctor: number, dateTime: Date) => {
         const appointment: {}[] = await this.daoAppointment.listAppointments(['appointmentdate'], [
             { idDoctor, appointmentStatus: 0 },
             { idDoctor, appointmentStatus: 1 }
         ]);
         if (appointment.length > 0) {
-            this.verifyHourDiference(appointment, dateTime)
+            this.verifyHourDiference(appointment, dateTime);
         }
     };
-    verifyIfCustomerHaveAppointment = async (userId: number, dateTime: Date) => {
+    public verifyIfCustomerHaveAppointment = async (userId: number, dateTime: Date) => {
         const appointment: {}[] = await this.daoAppointment.listAppointments(['appointmentdate'], [
             { idUser: userId, appointmentStatus: 1 },
         ]);
         if (appointment.length > 0) {
-            this.verifyHourDiference(appointment, dateTime)
+            this.verifyHourDiference(appointment, dateTime);
         }
     };
 
-    verifyHourDiference = (appointments: {}[], dateTime: Date) => {
+    public verifyHourDiference = (appointments: {}[], dateTime: Date) => {
         appointments.forEach((a: { appointmentdate: string }) => {
             const MS_HOUR = 3600000;
             const convertToDate: Date = this.structureDate(a.appointmentdate);
             const difference: Double = Math.abs(dateTime.getTime() - convertToDate.getTime()) / MS_HOUR;
-            if (difference < 1) { throw new BussinessExcp({ code: 'invalid_appointment_hour' }); }
+            if (difference < 1) {
+                throw new BussinessExcp({ code: 'invalid_appointment_hour' });
+            }
         });
     };
-    structureDate = (appointmentDate: string): Date => {
+    private structureDate = (appointmentDate: string): Date => {
         const YEAR_SPLITED_INDEX = 2;
         const MONTH_SPLITED_INDEX = 1;
-        const TIME_SPLITED_INDEX = 2;
+        const TIME_SPLITED_INDEX = 3;
         const DAY_AND_HOUR_SPLITED_INDEX = 0;
         const DateSplited: string[] = appointmentDate.split('/');
         const Time: string[] = DateSplited[TIME_SPLITED_INDEX].split(':');

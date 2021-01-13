@@ -15,9 +15,7 @@ describe('Domain - Appointment Service', () => {
         const _appointmentService = new QueryAppointmentHandler(
             {
                 listAppointments: jest.fn((async () => appoitmentsList)),
-                findAppointmentByIdAndStatus: jest.fn((async () => new AppointmentEntity())),
-                findAppointmentByIds: jest.fn(async () => new AppointmentEntity()),
-                findAppointmentById: jest.fn(async () => new AppointmentEntity()),
+                findAppointmentByParameters: jest.fn((async () => new AppointmentEntity())),
             });
         expect(await _appointmentService.executeList()).toEqual(appoitmentsList);
     });
@@ -27,9 +25,7 @@ describe('Domain - Appointment Service', () => {
         const _appointmentService = new QueryAppointmentHandler(
             {
                 listAppointments: jest.fn((async () => appoitmentsList)),
-                findAppointmentByIdAndStatus: jest.fn((async () => new AppointmentEntity())),
-                findAppointmentByIds: jest.fn(async () => new AppointmentEntity()),
-                findAppointmentById: jest.fn(async () => new AppointmentEntity()),
+                findAppointmentByParameters: jest.fn((async () => new AppointmentEntity())),
             });
         expect(await _appointmentService.executeMyList([])).toEqual(appoitmentsList);
     });
@@ -39,9 +35,7 @@ describe('Domain - Appointment Service', () => {
         const _appointmentService = new QueryAppointmentHandler(
             {
                 listAppointments: jest.fn((async () => appoitmentsList)),
-                findAppointmentByIdAndStatus: jest.fn((async () => new AppointmentEntity())),
-                findAppointmentByIds: jest.fn(async () => new AppointmentEntity()),
-                findAppointmentById: jest.fn(async () => new AppointmentEntity()),
+                findAppointmentByParameters: jest.fn((async () => new AppointmentEntity())),
             });
         expect(await _appointmentService.executeAgendaList([])).toEqual(appoitmentsList);
     });
@@ -82,16 +76,6 @@ describe('Domain - Appointment Service', () => {
             expect(e.response.message.code).toBe('appointment_create_expired');
         }
     });
-    // const _appointmentService: AppointmentService = new AppointmentService(
-    //     null, null, null, {
-    //         verifyAutoSelect: jest.fn(() => {}),
-    //         verifyRole: jest.fn(() => {}),
-    //         verifyDNI: jest.fn(() => {}),
-    //         verifyIfCustomerHaveBalance: jest.fn(async () => new UserEntity()),
-    //         verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
-    //         verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
-    //     }, null);
-
 
     it('It should fail if the Doctor want create an appointment on the same hour', async () => {
         try {
@@ -150,9 +134,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
 
@@ -179,9 +161,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
             const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
@@ -208,9 +188,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => { throw new BussinessExcp({ code: 'appointment_not_exists' }) }),
+                verifyAppointmentByParameters: jest.fn(async () => { throw new BussinessExcp({ code: 'appointment_not_exists' }) }),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
             const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
@@ -236,9 +214,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
             const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
@@ -266,9 +242,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
             const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
@@ -294,9 +268,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
             const selectorModel: AppointmentSelector = new AppointmentSelector(appointmentDto);
@@ -324,9 +296,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => { throw new BussinessExcp({ code: 'appointment_not_exists' }) }),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => { throw new BussinessExcp({ code: 'appointment_not_exists' }) }),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
             await _appointmentService.executeCanceller(1, 1);
@@ -354,9 +324,7 @@ describe('Domain - Appointment Service', () => {
                 verifyDoctorActionType: jest.fn(() => ActionType.Cancel),
                 verifyCustomerActionType: jest.fn(() => ActionType.Cancel),
             }, {
-                verifyAppointmentByIdsAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentByIdAndReturn: jest.fn(async () => new AppointmentEntity()),
-                verifyAppointmentStatusAndReturn: jest.fn(async () => new AppointmentEntity()),
+                verifyAppointmentByParameters: jest.fn(async () => new AppointmentEntity()),
                 verifyAppointmentIsAvailable: jest.fn(() => { }),
             });
 

@@ -1,6 +1,6 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { QueryPaymentsHandler } from 'src/application/Payments/Query/query-appointment-handler';
-import { AuthGuard } from 'src/infraestructure/Appointments/adapters/Guard/AuthGuard';
+import { AuthGuard } from 'src/infraestructure/Configuration/Guard/AuthGuard';
 
 
 @Controller('/api/payments')

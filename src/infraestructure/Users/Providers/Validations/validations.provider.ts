@@ -9,14 +9,14 @@ import { UserValidations } from 'src/domain/UserActions/Users/Validations/UserVa
 export const MergeCredentialsRepository = {
     provide: CredentialsValidationsRepository,
     useClass: CredentialsValidations
-}
+};
 
 export const MergeOperationsRepository = {
     provide: OperationsValidationsRepository,
     useClass: OperationsValidations
-}
+};
 
 export const MergeUserValidations = {
     provide: UsersValidationsRepository,
     useClass: UserValidations
-}
+};

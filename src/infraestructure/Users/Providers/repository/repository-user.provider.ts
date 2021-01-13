@@ -6,4 +6,4 @@ import { RepositoryUserMysql } from '../../adapters/repository/repository-user-m
 export const RepositoryUserProvider = {
     provide: RepositoryUser,
     useClass: RepositoryUserMysql
-}
+};

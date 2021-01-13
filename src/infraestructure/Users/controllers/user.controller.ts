@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Put, UsePipes, ValidationPipe, UseGuards, Req } from '@nestjs/common';
 import { UserCommand } from 'src/application/Users/Command/user-command';
 import { UserHandler } from 'src/application/Users/Command/user-hander';
-import { AuthGuard } from 'src/infraestructure/Appointments/adapters/Guard/AuthGuard';
+import { AuthGuard } from 'src/infraestructure/Configuration/Guard/AuthGuard';
 
 @Controller('api/user')
 export class UserController {

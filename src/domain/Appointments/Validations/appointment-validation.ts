@@ -11,27 +11,14 @@ export class AppointmentValidation implements AppointmentValidationRepository {
         private readonly daoAppointment: DaoAppointment) { }
 
 
-    verifyAppointmentStatusAndReturn = async (idAppointment: number): Promise<AppointmentEntity> => {
-        const Appointment: AppointmentEntity = await this.daoAppointment.findAppointmentByIdAndStatus(idAppointment);
+    verifyAppointmentByParameters = async (parameters: {}[]) => {
+        const Appointment: AppointmentEntity = await this.daoAppointment.findAppointmentByParameters(parameters);
         if (!Appointment) {
             throw new BussinessExcp({ code: 'appointment_not_exists' });
         }
-        return Promise.resolve(Appointment);
-    };
-
-
-    verifyAppointmentByIdsAndReturn = async (idAppointment: number, userId: number): Promise<AppointmentEntity> => {
-        const Appointment: AppointmentEntity = await this.daoAppointment.findAppointmentByIds(idAppointment, userId);
-        if (!Appointment) { throw new BussinessExcp({ code: 'appointment_not_exists' }); }
 
         return Promise.resolve(Appointment);
-    };
-    verifyAppointmentByIdAndReturn = async (idAppointment: number): Promise<AppointmentEntity> => {
-        const Appointment: AppointmentEntity = await this.daoAppointment.findAppointmentById(idAppointment);
-        if (!Appointment) { throw new BussinessExcp({ code: 'appointment_not_exists' }); }
-
-        return Promise.resolve(Appointment);
-    };
+    }
 
     verifyAppointmentIsAvailable = (appointmentStatus: number) => {
         const APPOINTMENT_CANCELED_STATUS = 2;
@@ -39,4 +26,6 @@ export class AppointmentValidation implements AppointmentValidationRepository {
             throw new BussinessExcp('appointment_already_cancelled');
         }
     };
+
+
 }

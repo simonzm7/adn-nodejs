@@ -14,7 +14,7 @@ export class DaoPaymentsMysql implements DaoPayments{
             where: {idUser}
         });
         const tempPayments: {}[] = [];
-        payments.forEach((p: PaymentsEntity) => tempPayments.push({ date: p.createdAt.toLocaleString(), value: p.paymentValue, paymentCode: p.paymentType }))
+        payments.forEach((p: PaymentsEntity) => tempPayments.push({ date: p.createdAt.toLocaleString(), value: p.paymentValue, paymentCode: p.paymentType }));
         return tempPayments;
     };
 }

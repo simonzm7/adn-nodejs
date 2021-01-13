@@ -32,7 +32,7 @@ export class AppointmentService {
 
         await this.userAppointmentValidation.verifyAutoSelect(selector.getUserId, selector.getAppointmentId);
         await this.dateValidationRepository.verifyIfCustomerHaveAppointment(selector.getUserId, selector.getAppointmentDate);
-        const appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentStatusAndReturn(selector.getAppointmentId);
+        const appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentByParameters([{ idAppointment: selector.getAppointmentId, appointmentStatus: 0 }]);
 
         await this.dateValidationRepository.verifyAppointmentValidDate(appointment.appointmentdate, ActionType.Select);
         const user: UserEntity = await this.userAppointmentValidation.verifyIfCustomerHaveBalance(selector.getUserId, appointment.costappointment);
@@ -41,9 +41,12 @@ export class AppointmentService {
         appointment.idUser = user.userId;
         await this.appointmentDBRepository.updateAppointment(appointment, ActionType.Take, user);
     };
-    executeCanceller = async (idAppointment: number, userId: number) => {
-        const Appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentByIdsAndReturn(idAppointment, userId);
-        const user: UserEntity = await this.userValidations.userAlreadyExistsAndReturn(userId);
+    executeCanceller = async (idAppointment: number, idUser: number) => {
+        const Appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentByParameters([
+            { idAppointment, appointmentStatus: 1, idUser },
+            { idAppointment, appointmentStatus: 0 }
+        ]);
+        const user: UserEntity = await this.userValidations.userAlreadyExistsAndReturn(idUser);
         this.appointmentValidation.verifyAppointmentIsAvailable(Appointment.appointmentStatus);
         let actionType: ActionType;
         actionType = this.userAppointmentValidation.verifyDoctorActionType(Appointment, user);

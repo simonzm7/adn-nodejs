@@ -4,4 +4,4 @@ import { DaoAppointmentMysql } from '../../adapters/dao/dao-appointment-mysql';
 export const DaoAppointmentProvider = {
     provide: DaoAppointment,
     useClass: DaoAppointmentMysql
-}
+};

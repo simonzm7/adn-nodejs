@@ -1,7 +1,7 @@
 import { Controller, Post, Body, Res, UsePipes, ValidationPipe, UseGuards, HttpStatus, Req, Get } from '@nestjs/common';
 import { QueryUser } from 'src/application/UserAuthentication/Query/query-user-handler';
 import AuthUserHandler from 'src/application/UserAuthentication/Command/auth-user-handler';
-import { AuthGuard } from 'src/infraestructure/Appointments/adapters/Guard/AuthGuard';
+import { AuthGuard } from 'src/infraestructure/Configuration/Guard/AuthGuard';
 import { UserDto } from 'src/application/UserAuthentication/Query/DTO/user.dto';
 import AuthCommand from 'src/application/UserAuthentication/Command/auth-command';
 

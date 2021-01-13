@@ -4,7 +4,7 @@ import { CommandCreateAppointment } from 'src/application/Appointments/command/c
 import { CommandSelectorAppointment } from 'src/application/Appointments/command/command-selector-appointment';
 import { QueryAppointmentHandler } from 'src/application/Appointments/query/query-appointment-handler';
 import { LessThan, Not } from 'typeorm';
-import { AuthGuard } from '../adapters/Guard/AuthGuard';
+import { AuthGuard } from '../../Configuration/Guard/AuthGuard';
 import { AppointmentEntity } from '../Entity/appointment.entity';
 
 @Controller('api/appointments')
@@ -18,13 +18,13 @@ export class AppointmentController {
       return res.status(HttpStatus.OK).json({
          message: await this.queryAppointment.executeList()
       });
-   };
+   }
    @Get('me')
    async getMyAppointments(@Res() res, @Req() req): Promise<AppointmentEntity[]> {
       return res.status(HttpStatus.OK).json({
          message: await this.queryAppointment.executeMyList([{ idUser: req.headers.userid }])
       });
-   };
+   }
 
    @Get('agenda')
    async getDoctorAgenda(@Res() res, @Req() req): Promise<AppointmentEntity[]> {
@@ -40,29 +40,29 @@ export class AppointmentController {
          }
          ])
       });
-   };
+   }
 
    @UsePipes(new ValidationPipe({ transform: true }))
    @Post()
    async create(@Body() appointment: CommandCreateAppointment, @Req() req) {
       appointment.idDoctor = req.headers.userid;
       await this.commandAppointment.executeCreate(appointment);
-   };
+   }
    @UsePipes(new ValidationPipe({ transform: true }))
    @Put()
    async selectAppointment(@Body() dto: CommandSelectorAppointment, @Req() req, @Res() res) {
       dto.userId = req.headers.userid;
       await this.commandAppointment.executeSelector(dto);
-   };
+   }
 
    @Put(':id')
    async cancelAppointment(@Param() param, @Req() req) {
       await this.commandAppointment.executeCanceller(+(param.id), req.headers.userid);
-   };
+   }
 
 
    @Delete(':id')
    async deleteAppointment(@Param() param, @Req() req){
       await this.commandAppointment.executeDeletor(+(param.id), req.headers.userid);
-   };
+   }
 }

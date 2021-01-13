@@ -1,8 +1,10 @@
+import AuthCommand from "src/application/UserAuthentication/Command/auth-command";
 import { BussinessExcp } from "src/domain/Exceptions/BussinessExcp";
-import {UserAuthenticationService} from "src/domain/UserActions/UserAuthentication/Service/UserAuthenticationService";
-import AuthCommand from 'src/application/UserAuthentication/Command/auth-command';
-import { UserAuth } from 'src/domain/UserActions/UserAuthentication/Model/UserAuth'
+import { UserAuth } from "src/domain/UserActions/UserAuthentication/Model/UserAuth";
+import { UserAuthenticationService } from "src/domain/UserActions/UserAuthentication/Service/UserAuthenticationService";
 import { UserEntity } from "src/infraestructure/Users/Entity/user.entity";
+
+
 describe('Domain - AuthUserService', () => {
 
     it("It should be fail if the user on authentication don't exists", async () => {
@@ -11,7 +13,9 @@ describe('Domain - AuthUserService', () => {
                 {
                     userAlreadyExists: jest.fn(async (email, dni) => { }),
                     userAlreadyExistsAndReturn: jest.fn(async (email) => { throw new BussinessExcp({ code: 'email_not_found' }) }),
-                }, null);
+                }, {
+                    validationPassword: jest.fn(() => {})
+                });
             const user: AuthCommand = {
                 email: 'asd@asd.com',
                 password: '12345'
@@ -32,7 +36,7 @@ describe('Domain - AuthUserService', () => {
             const _userAuthenticationService: UserAuthenticationService = new UserAuthenticationService({
                 userAlreadyExists: jest.fn(async (email, dni) => { }),
                 userAlreadyExistsAndReturn: jest.fn(async (email) => new UserEntity()),
-                
+              
             }, {
                 validationPassword: jest.fn((credentials: UserAuth, password: string) => { throw new BussinessExcp({ code: 'invalid_password' }) })
             });

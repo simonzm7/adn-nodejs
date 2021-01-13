@@ -5,4 +5,4 @@ import { DaoPaymentsMysql } from 'src/infraestructure/Payments/Adapters/dao/dao-
 export const DaoPaymentsProvider = {
     provide : DaoPayments,
     useClass: DaoPaymentsMysql
-}
+};

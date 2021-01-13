@@ -17,13 +17,13 @@ export class RepositoryUserMysql implements RepositoryUser {
 
     public async createOne(user: User) {
         await this.userRepository.save({
-            email: user.get_email,
-            password: user.get_password,
-            firstname: user.get_first_name,
-            lastname: user.get_last_name,
-            dni: user.get_dni,
+            email: user.getEmail,
+            password: user.getPassword,
+            firstname: user.getFirstName,
+            lastname: user.getLastName,
+            dni: user.getDni,
             balance: 1000000,
-            role: user.get_role
+            role: user.getRole
         })
             .then(() => { throw new SuccessExcp({ code: 'user_created' }); });
     };

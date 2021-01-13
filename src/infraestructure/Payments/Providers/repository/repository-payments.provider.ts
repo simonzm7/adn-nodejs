@@ -5,4 +5,4 @@ import { RepositoryPaymentsMysql } from '../../Adapters/repository/repository-pa
 export const RepositoryPaymentsProvider = {
     provide: RepositoryPayments,
     useClass: RepositoryPaymentsMysql
-}
+};

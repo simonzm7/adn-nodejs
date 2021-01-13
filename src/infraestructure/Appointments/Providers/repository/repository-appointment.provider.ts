@@ -5,4 +5,4 @@ import { RepositoryAppointmentMysql } from '../../adapters/repository/repository
 export const RepositoryAppointmentProvider = {
     provide: AppointmentRepository,
     useClass: RepositoryAppointmentMysql
-}
+};

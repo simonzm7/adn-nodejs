@@ -4,4 +4,4 @@ import { DaoAuthMysql } from '../../Adapters/dao/dao-auth-mysql'
 export const MergeDaoAdapter = {
     provide: DaoAuth,
     useClass: DaoAuthMysql
-}
+};

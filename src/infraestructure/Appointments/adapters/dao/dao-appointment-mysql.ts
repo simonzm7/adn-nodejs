@@ -16,25 +16,9 @@ export class DaoAppointmentMysql implements DaoAppointment {
             where: parameters
         });
     };
-
-    public findAppointmentByIdAndStatus = async (idAppointment: number): Promise<AppointmentEntity> => {
+    public findAppointmentByParameters = async (parameters : {}[]) => {
         return await this.appointmentEntity.findOne({
-            where: {
-                idAppointment,
-                appointmentStatus: 0
-            }
+            where: parameters
         });
-    };
-
-    public findAppointmentByIds = async (idAppointment: number, idUser: number): Promise<AppointmentEntity> => {
-        return await this.appointmentEntity.findOne({
-            where: [
-                { idAppointment, appointmentStatus: 1, idUser },
-                { idAppointment, appointmentStatus: 0 }
-            ]
-        });
-    };
-    public findAppointmentById = async (idAppointment: number): Promise<AppointmentEntity> => {
-        return await this.appointmentEntity.findOne({ idAppointment });
-    };
+    }
 }

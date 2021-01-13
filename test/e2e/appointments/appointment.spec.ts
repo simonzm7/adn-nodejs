@@ -33,7 +33,7 @@ describe('AppointmentController', () => {
         queryAppointmentHandler = createStubObj<QueryAppointmentHandler>(['executeList', 'executeAgendaList' , 'executeMyList'], sinonSandbox);
 
         daoAppointment = createStubObj<DaoAppointment>(
-            ['findAppointmentById', 'findAppointmentByIdAndStatus', 'findAppointmentByIds', 'listAppointments'], sinonSandbox);
+            ['findAppointmentByParameters', 'listAppointments'], sinonSandbox);
 
         appointmentRepository = createStubObj<AppointmentRepository>(
             ['createAppointment', 'deleteAppointment', 'updateAppointment'], sinonSandbox);
@@ -42,7 +42,7 @@ describe('AppointmentController', () => {
             ['userAlreadyExists', 'userAlreadyExistsAndReturn'], sinonSandbox);
 
         appointmenttValidationRepository = createStubObj<AppointmentValidationRepository>(
-            ['verifyAppointmentByIdAndReturn', 'verifyAppointmentByIdsAndReturn', 'verifyAppointmentIsAvailable', 'verifyAppointmentStatusAndReturn'], sinonSandbox);
+            ['verifyAppointmentByParameters', 'verifyAppointmentIsAvailable'], sinonSandbox);
         
         dateValidationsRepository = createStubObj<DateValidationRepository>(
             ['verifyAppointmentValidDate', 'verifyHourDiference', 'verifyIfCustomerHaveAppointment', 'verifyIfDoctorHaveAppointment'], sinonSandbox);
@@ -289,7 +289,7 @@ describe('AppointmentController', () => {
         }
         userAppointmentValidationRepository.verifyAutoSelect.returns({});
         dateValidationsRepository.verifyIfCustomerHaveAppointment.returns({});
-        appointmenttValidationRepository.verifyAppointmentStatusAndReturn.throws(new BussinessExcp({ code: 'appointment_not_exists' }));
+        appointmenttValidationRepository.verifyAppointmentByParameters.throws(new BussinessExcp({ code: 'appointment_not_exists' }));
 
         const response: request.Response = await request(app.getHttpServer())
             .put('/api/appointments').set({ userId: 1 }).send(selecte_appointment)
@@ -304,7 +304,7 @@ describe('AppointmentController', () => {
         }
         userAppointmentValidationRepository.verifyAutoSelect.returns({});
         dateValidationsRepository.verifyIfCustomerHaveAppointment.returns({});
-        appointmenttValidationRepository.verifyAppointmentStatusAndReturn.returns(Promise.resolve(new AppointmentEntity()));
+        appointmenttValidationRepository.verifyAppointmentByParameters.returns(Promise.resolve(new AppointmentEntity()));
         dateValidationsRepository.verifyAppointmentValidDate.throws(new BussinessExcp({ code: 'appointment_select_expired' }));
 
         const response: request.Response = await request(app.getHttpServer())
@@ -317,7 +317,7 @@ describe('AppointmentController', () => {
 
     userAppointmentValidationRepository.verifyAutoSelect.returns({});
     dateValidationsRepository.verifyIfCustomerHaveAppointment.returns({});
-    appointmenttValidationRepository.verifyAppointmentStatusAndReturn.returns(Promise.resolve(new AppointmentEntity()));
+    appointmenttValidationRepository.verifyAppointmentByParameters.returns(Promise.resolve(new AppointmentEntity()));
     dateValidationsRepository.verifyAppointmentValidDate.returns({});
     userAppointmentValidationRepository.verifyIfCustomerHaveBalance.throws(new BussinessExcp({ code: 'insuficient_balance' }));
 
@@ -345,7 +345,7 @@ const user: any = {
 }
 userAppointmentValidationRepository.verifyAutoSelect.returns({});
 dateValidationsRepository.verifyIfCustomerHaveAppointment.returns({});
-appointmenttValidationRepository.verifyAppointmentStatusAndReturn.returns(Promise.resolve(new AppointmentEntity()));
+appointmenttValidationRepository.verifyAppointmentByParameters.returns(Promise.resolve(new AppointmentEntity()));
 dateValidationsRepository.verifyAppointmentValidDate.returns({});
 userAppointmentValidationRepository.verifyIfCustomerHaveBalance.returns(Promise.resolve(new UserEntity()));
 userAppointmentValidationRepository.verifyDNI.throws(new BussinessExcp({ code: 'invalid_dni_day' }));
@@ -363,7 +363,7 @@ expect(response.body.message.code).toEqual('invalid_dni_day');
 // // //  Cancel Appointment
 it('It should be fail if the appointment do not exists', async () => {
 
-    appointmenttValidationRepository.verifyAppointmentByIdsAndReturn.throws(new BussinessExcp({ code: 'appointment_not_exists' }));
+    appointmenttValidationRepository.verifyAppointmentByParameters.throws(new BussinessExcp({ code: 'appointment_not_exists' }));
     const response: request.Response = await request(app.getHttpServer())
         .put('/api/appointments/1')
         .set(commonHeader)
@@ -373,7 +373,7 @@ it('It should be fail if the appointment do not exists', async () => {
 
 it('It should be fail if the user do not exists', async () => {
 
-    appointmenttValidationRepository.verifyAppointmentByIdsAndReturn.returns(Promise.resolve(new AppointmentEntity()));
+    appointmenttValidationRepository.verifyAppointmentByParameters.returns(Promise.resolve(new AppointmentEntity()));
     usersValidationsRepository.userAlreadyExistsAndReturn.throws(new BussinessExcp({ code: 'email_not_found' }));
     const response: request.Response = await request(app.getHttpServer())
         .put('/api/appointments/1')

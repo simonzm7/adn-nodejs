@@ -17,8 +17,9 @@ export class UserAppointmentValidation implements UserAppointmentValidationRepos
 
     constructor(private readonly daoUser: DaoUser,
         private readonly daoAppointment: DaoAppointment) { }
-    verifyAutoSelect = async (idUser: number, appointmentId: number) => {
-        const appointment: AppointmentEntity = await this.daoAppointment.findAppointmentById(appointmentId);
+
+    verifyAutoSelect = async (idUser: number, idAppointment: number) => {
+        const appointment: AppointmentEntity = await this.daoAppointment.findAppointmentByParameters([{ idAppointment }]);
 
         if (Number(appointment.idDoctor) === Number(idUser)) {
             throw new BussinessExcp({ code: 'auto_appointment' });
@@ -42,17 +43,23 @@ export class UserAppointmentValidation implements UserAppointmentValidationRepos
         const DNI_END = 10;
         const DIVIDER = 2;
         if ((+(dni.substring(DNI_START, DNI_END))) % DIVIDER === 0) {
-            if (!(weekDay === WeekDays.Monday || weekDay === WeekDays.Wednesday || weekDay === WeekDays.Friday)) { throw new BussinessExcp({ code: 'invalid_dni_day' }); }
+            if (!(weekDay === WeekDays.Monday || weekDay === WeekDays.Wednesday || weekDay === WeekDays.Friday)) {
+                throw new BussinessExcp({ code: 'invalid_dni_day' });
+            }
 
         }
         if ((+(dni.substring(DNI_START, DNI_END))) % DIVIDER === 1) {
-            if (!(weekDay === WeekDays.Tuesday || weekDay === WeekDays.Thursday || weekDay === WeekDays.Saturday)) { throw new BussinessExcp({ code: 'invalid_dni_day' }); }
+            if (!(weekDay === WeekDays.Tuesday || weekDay === WeekDays.Thursday || weekDay === WeekDays.Saturday)) {
+                throw new BussinessExcp({ code: 'invalid_dni_day' });
+            }
         }
     };
 
     verifyIfCustomerHaveBalance = async (userId: number, appointmentCost): Promise<UserEntity> => {
         const user: UserEntity = await this.daoUser.findOneById(userId);
-        if (!(user && user.balance >= appointmentCost)) { throw new BussinessExcp({ code: 'insuficient_balance' }); }
+        if (!(user && user.balance >= appointmentCost)) {
+            throw new BussinessExcp({ code: 'insuficient_balance' });
+        }
 
         return Promise.resolve(user);
     };

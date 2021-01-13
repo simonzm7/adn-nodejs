@@ -9,7 +9,9 @@ export class AuthGuard implements CanActivate {
     }
     canActivate(context: ExecutionContext): boolean {
         const req = context.switchToHttp().getRequest();
-        if (this.regex.number.test(req.headers.userid)) { return true };
+        if (this.regex.number.test(req.headers.userid)) {
+            return true
+        }
         throw new UnauthorizedExcp({ code: 'user_unauthorized' });
     }
 }

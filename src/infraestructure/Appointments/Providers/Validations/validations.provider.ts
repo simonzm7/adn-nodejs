@@ -8,14 +8,14 @@ import { UserAppointmentValidation } from 'src/domain/Appointments/Validations/u
 export const MergeDateValidations = {
     provide: DateValidationRepository,
     useClass: DateValidation
-}
+};
 
 export const MergeAppointmentValidation = {
     provide: AppointmentValidationRepository,
     useClass: AppointmentValidation
-}
+};
 
 export const MergeUserAppointmentValidations = {
     provide: UserAppointmentValidationRepository,
     useClass: UserAppointmentValidation
-}
+};

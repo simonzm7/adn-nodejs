@@ -18,8 +18,8 @@ export class Appointment {
         this.initializeValidations();
     }
     initializeValidations() {
-        const MIN_COST : number = 0;
-        const MAX_COST : number = 1000000;
+        const MIN_COST = 0;
+        const MAX_COST = 1000000;
         GlobalModelValidations.validDateFormat(this.appointmentDate);
         GlobalModelValidations.validDay(this.StructuredDate.getDay());
         GlobalModelValidations.validHours(this.appointmentDate, this.StructuredDate.getHours());
@@ -28,8 +28,8 @@ export class Appointment {
         GlobalModelValidations.isHigherOrLower(this.cost, { min: MIN_COST, max: MAX_COST });
     }
     structureDate() {
-        const TIME_INDEX : number = 3;
-        const YEAR_INDEX : number = 2;
+        const TIME_INDEX  = 3;
+        const YEAR_INDEX  = 2;
         const DateSplited: string[] = this.appointmentDate.split('/');
         const Time: string[] = DateSplited[TIME_INDEX].split(':');
         const YEAR: number = +DateSplited[YEAR_INDEX];

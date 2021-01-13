@@ -11,7 +11,7 @@ export class UserService {
     private readonly userValidations : UsersValidationsRepository) { }
 
   public async executeCreate(user: User) {
-    await this.userValidations.userAlreadyExists(user.get_email, user.get_dni);
+    await this.userValidations.userAlreadyExists(user.getEmail, user.getDni);
     await this.userRepository.createOne(user);
   }
 
