@@ -16,11 +16,12 @@ export class Requests {
 
 
     public static Instance = () => {
-        if (!Requests.Singleton)
+        if (!Requests.Singleton) {
             Requests.Singleton = new Requests();
+        }
 
         return Requests.Singleton;
-    }
+    };
 
     public createRequest = async ({ url, method, headers, data, errorCode }: IRequest) => {
         const response = await axios({
@@ -28,7 +29,7 @@ export class Requests {
             url,
             headers,
             data
-        }).then((resp) => resp.data).catch(() => { throw new BussinessExcp({code: errorCode}) })
+        }).then((resp) => resp.data).catch(() => { throw new BussinessExcp({ code: errorCode }) })
         return response;
-    }
+    };
 }

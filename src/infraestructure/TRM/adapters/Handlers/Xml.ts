@@ -8,14 +8,15 @@ export class Xml {
 
 
     public static Instance = () => {
-        if (!Xml.Singleton)
+        if (!Xml.Singleton) {
             Xml.Singleton = new Xml();
+        }
 
         return Xml.Singleton;
-    }
+    };
 
-    public deserializeXml = async ({ xml }: IRequest) : Promise<string> => {
-        const doc : Document = await new DOMParser().parseFromString(xml);
+    public deserializeXml = async ({ xml }: IRequest): Promise<string> => {
+        const doc: Document = await new DOMParser().parseFromString(xml);
         return doc.getElementsByTagName('value')[0].childNodes[0].nodeValue;
-    }
+    };
 }

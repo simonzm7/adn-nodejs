@@ -9,6 +9,6 @@ export class QueryUser {
     constructor(private readonly queryRepositoy : DaoAuth){}
 
     async executeQuery(userId : string) : Promise<UserDto>{
-        return await this.queryRepositoy.getUser(Number(userId));
+        return this.queryRepositoy.getUser(Number(userId));
     }
 }

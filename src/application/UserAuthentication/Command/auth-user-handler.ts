@@ -10,5 +10,5 @@ export default class AuthUserHandler {
             email: credentials.email,
             password: credentials.password
         }));
-    }
+    };
 }

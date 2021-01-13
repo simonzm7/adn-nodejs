@@ -4,7 +4,6 @@ import { BalanceService } from 'src/domain/UserActions/Users/services/BalanceSer
 import { UserService } from 'src/domain/UserActions/Users/services/UserService';
 import { UserCommand } from './user-command';
 
-
 @Injectable()
 export class UserHandler {
     constructor(private readonly userService : UserService,

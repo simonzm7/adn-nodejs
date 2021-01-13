@@ -21,7 +21,7 @@ export class RepositoryPaymentsMysql {
         } catch {
             throw new BussinessExcp({ code: 'payment_failed' });
         }
-    }
+    };
 
     public deletePayment = async (payment: PaymentModel) => {
         try {
@@ -34,5 +34,5 @@ export class RepositoryPaymentsMysql {
         } catch {
             throw new BussinessExcp({ code: 'payment_cancel_failed' });
         }
-    }
+    };
 }

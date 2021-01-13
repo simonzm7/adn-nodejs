@@ -1,9 +1,10 @@
+import { Roles } from '../Appointments/Enums/Roles';
 import { BussinessExcp } from '../Exceptions/BussinessExcp';
 
 class GlobalValidations {
 
     private readonly regex = {
-        email:  /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
+        email: /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/,
         stringOnly: /^[a-zA-ZÀ-ÿ\s]{1,40}$/,
         numberOnly: /^[0-9]+$/,
         booleanOnly: /^(true|false|1|0)$/,
@@ -38,29 +39,36 @@ class GlobalValidations {
     };
 
     isLength = (value, type, conditions: { min: number, max: number }) => {
-        if (value.length < conditions.min)
+        if (value.length < conditions.min) {
             throw new BussinessExcp({ code: `invalid_${type}_minimum_length`, allowedLength: conditions.min });
-        if (value.length > conditions.max)
+        }
+        if (value.length > conditions.max) {
             throw new BussinessExcp({ code: `invalid_${type}_maximum_length`, allowedLength: conditions.min });
+        }
     };
 
     isHigherOrLower = (value, conditions: { min: number, max: number }) => {
-        if ((+value) < conditions.min)
+        if ((+value) < conditions.min) {
             throw new BussinessExcp({ code: 'invalid_minimum_appointment_cost', allowedCost: conditions.min });
-        if ((+value) > conditions.max)
+        }
+        if ((+value) > conditions.max) {
             throw new BussinessExcp({ code: 'invalid_maximum_appointment_cost', allowedCost: conditions.max });
+        }
     }
     isString = (value: string, type: string) => {
-        if (!this.regex.stringOnly.test(value))
+        if (!this.regex.stringOnly.test(value)) {
             throw new BussinessExcp({ code: `invalid_${type}_format` });
+        }
     };
     isNumber = (type: string, number: string) => {
-        if (!this.regex.numberOnly.test(number))
+        if (!this.regex.numberOnly.test(number)) {
             throw new BussinessExcp({ code: 'invalid_' + type + '_format' });
+        }
     };
     isRole = (role: string) => {
-        if (!(role === 'Customer' || role === 'Doctor'))
+        if (!(role === Roles.Customer || role === Roles.Doctor)) {
             throw new BussinessExcp({ code: 'invalid_role' });
+        }
     };
     validDateFormat = (date: string) => {
         if (!this.regex.date.test(date)) {
@@ -68,18 +76,24 @@ class GlobalValidations {
         }
     }
     validDay = (day: number) => {
-        if (day === 0)
+        if (day === 0) {
             throw new BussinessExcp({ code: 'invalid_appointment_day' });
+        }
     }
     validHours = (appointmentDate: string, Hour: number) => {
         const Holiday = this.Holidays.filter(d => d === appointmentDate.substring(0, 5));
-        if (Holiday.length === 0 && Hour < 7 || Hour === 12 || Hour > 17)
+        const SEVEN_AM = 7;
+        const TWELVE_PM = 12;
+        const TEN_AM = 10;
+        const NO_HOLIDAY_END_DAY = 17;
+        const HOLIDAY_END_DAY = 15;
+        if (Holiday.length === 0 && Hour < SEVEN_AM || Hour === TWELVE_PM || Hour > NO_HOLIDAY_END_DAY) {
             throw new BussinessExcp({ code: 'invalid_appointment_schedule' });
+        }
 
-        if (Holiday.length > 0 && Hour < 10 || Hour === 12 || Hour > 15)
+        if (Holiday.length > 0 && Hour < TEN_AM || Hour === TWELVE_PM || Hour > HOLIDAY_END_DAY) {
             throw new BussinessExcp({ code: 'invalid_appointment_schedule' });
+        }
     }
 }
-
-
 export default new GlobalValidations;

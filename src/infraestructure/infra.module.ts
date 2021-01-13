@@ -19,4 +19,3 @@ import UserAuthenticationModule from './UserAuthentication/auth.module';
     })]
 })
 export class InfraestructureModel { }
-//  PaymentsModule, TrmModule,

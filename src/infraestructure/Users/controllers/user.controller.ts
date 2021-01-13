@@ -20,5 +20,4 @@ export class UserController {
   async updateBalance(@Body() newBalance: { balance : string }, @Req() req) {
     await this.userManagment.executeBalance(Number(newBalance.balance), req.headers.userid);
   }
-
 }

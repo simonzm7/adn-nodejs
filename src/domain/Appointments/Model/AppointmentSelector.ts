@@ -15,14 +15,12 @@ export class AppointmentSelector {
     structureDate() {
         const DateSplited: string[] = this.week.split('/');
         const Time: string[] = DateSplited[3].split(':');
-        // 
         const YEAR: number = +DateSplited[2];
         const MONTH: number = +DateSplited[1];
         const DAY: number = +DateSplited[0];
         const HOUR: number = +Time[0];
         const MINUTES: number = +Time[1];
-        const date: Date = new Date(YEAR, MONTH, DAY, HOUR, MINUTES)
-        return date;
+        return new Date(YEAR, MONTH, DAY, HOUR, MINUTES)
     }
     get getAppointmentDate(): Date {
         return this.appointmentDate;

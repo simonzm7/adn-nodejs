@@ -18,13 +18,10 @@ export default class UserAuthenticationController {
         await this.authManagment.executeLogin(credentials);
     }
 
-
-
     @UseGuards(AuthGuard)
     @Get('me')
     async IsAuthenticated(@Req() req, @Res() res) {
         const user: UserDto = await this.queryUser.executeQuery(req.headers.userid);
         return res.status(HttpStatus.OK).json({ message: { code: 'user_me', data: user }});
     }
-
 }

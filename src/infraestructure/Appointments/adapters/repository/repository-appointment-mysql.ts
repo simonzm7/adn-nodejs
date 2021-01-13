@@ -19,7 +19,7 @@ export class RepositoryAppointmentMysql implements AppointmentRepository {
         private readonly repositoryUser: RepositoryUser,
         private readonly paymentRepository: RepositoryPayments) { }
 
-    createAppointment = async (appointment: Appointment) => {
+    public createAppointment = async (appointment: Appointment) => {
         await this.appointmentEntity.save({
             idDoctor: appointment.getDoctorId,
             doctorname: appointment.getDoctorname,
@@ -30,9 +30,9 @@ export class RepositoryAppointmentMysql implements AppointmentRepository {
             createdAt: new Date().toLocaleString()
         })
         throw new SuccessExcp({ code: 'appointment_created' });
-    }
+    };
 
-    updateAppointment = async (appointment: AppointmentEntity, actionType: ActionType, user: UserEntity) => {
+    public updateAppointment = async (appointment: AppointmentEntity, actionType: ActionType, user: UserEntity) => {
         await this.appointmentEntity.save(appointment)
             .then(async () => {
                 switch (actionType) {
@@ -57,11 +57,11 @@ export class RepositoryAppointmentMysql implements AppointmentRepository {
                 await this.repositoryUser.updateUser(user, appointment.idAppointment);
                 throw new SuccessExcp({ code: `appointment_${actionType}` });
             });
-    }
-    deleteAppointment = async (idAppointment: number) => {
+    };
+    public deleteAppointment = async (idAppointment: number) => {
         const verify = await this.appointmentEntity.findOne({ idAppointment });
-        if (!verify)
-            throw new BussinessExcp({ code: 'appointment_not_exists' });
+        if (!verify){
+            throw new BussinessExcp({ code: 'appointment_not_exists' });}
 
         await getConnection().createQueryBuilder()
             .delete()
@@ -70,5 +70,5 @@ export class RepositoryAppointmentMysql implements AppointmentRepository {
             .execute()
             .catch(() => { throw new BussinessExcp({ code: 'appointment_failed_elimination' }) });
         throw new SuccessExcp({ code: 'appointment_deleted' })
-    }
+    };
 }

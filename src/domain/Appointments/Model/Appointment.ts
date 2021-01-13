@@ -7,14 +7,7 @@ export class Appointment {
     private readonly appointmentDate: string;
     private readonly StructuredDate: Date;
     private readonly cost: number;
-    // 
-    private readonly TIME_INDEX : number = 3;
-    private readonly YEAR_INDEX : number = 2;
-    private readonly MONTH_AND_MINUTES_INDEX : number = 1;
-    private readonly DAY_AND_HOUR_INDEX : number = 0;
-    // 
-    private readonly MIN_COST : number = 0;
-    private readonly MAX_COST : number = 1000000;
+    
     constructor(idDoctor: number, doctorname: string, appointmentDate: string, cost: number) {
 
         this.idDoctor = idDoctor;
@@ -25,24 +18,26 @@ export class Appointment {
         this.initializeValidations();
     }
     initializeValidations() {
+        const MIN_COST : number = 0;
+        const MAX_COST : number = 1000000;
         GlobalModelValidations.validDateFormat(this.appointmentDate);
         GlobalModelValidations.validDay(this.StructuredDate.getDay());
         GlobalModelValidations.validHours(this.appointmentDate, this.StructuredDate.getHours());
         GlobalModelValidations.isNumber('', this.idDoctor.toString());
         GlobalModelValidations.isNumber('cost', this.cost.toString());
-        GlobalModelValidations.isHigherOrLower(this.cost, { min: this.MIN_COST, max: this.MAX_COST });
+        GlobalModelValidations.isHigherOrLower(this.cost, { min: MIN_COST, max: MAX_COST });
     }
     structureDate() {
-
+        const TIME_INDEX : number = 3;
+        const YEAR_INDEX : number = 2;
         const DateSplited: string[] = this.appointmentDate.split('/');
-        const Time: string[] = DateSplited[this.TIME_INDEX].split(':');
-        const YEAR: number = +DateSplited[this.YEAR_INDEX];
-        const MONTH: number = +DateSplited[this.MONTH_AND_MINUTES_INDEX];
-        const DAY: number = +DateSplited[this.DAY_AND_HOUR_INDEX];
-        const HOUR: number = +Time[this.DAY_AND_HOUR_INDEX];
-        const MINUTES: number = +Time[this.MONTH_AND_MINUTES_INDEX];
-        const date: Date = new Date(YEAR, MONTH, DAY, HOUR, MINUTES);
-        return date;
+        const Time: string[] = DateSplited[TIME_INDEX].split(':');
+        const YEAR: number = +DateSplited[YEAR_INDEX];
+        const MONTH: number = +DateSplited[1];
+        const DAY: number = +DateSplited[0];
+        const HOUR: number = +Time[0];
+        const MINUTES: number = +Time[1];
+        return new Date(YEAR, MONTH, DAY, HOUR, MINUTES);
     }
     get getDoctorId(): number {
         return this.idDoctor;

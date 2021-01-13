@@ -5,8 +5,6 @@ import { AppointmentValidation } from 'src/domain/Appointments/Validations/appoi
 import { DateValidation } from 'src/domain/Appointments/Validations/date-validation';
 import { UserAppointmentValidation } from 'src/domain/Appointments/Validations/user-appointment-validation';
 
-//Validations
-
 export const MergeDateValidations = {
     provide: DateValidationRepository,
     useClass: DateValidation

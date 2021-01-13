@@ -8,14 +8,14 @@ export class QueryAppointmentHandler{
             idUser: -1,
             appointmentStatus: 0
     }]): Promise<{}[]> => {
-        return await this.daoAppointment.listAppointments(['idAppointment', 'appointmentdate', 'doctorname', 'costappointment'], parameters);
-    }
+        return this.daoAppointment.listAppointments(['idAppointment', 'appointmentdate', 'doctorname', 'costappointment'], parameters);
+    };
 
     executeMyList = async (parameters: {}[]) : Promise<{}[]> => {
-        return await this.daoAppointment.listAppointments(['idAppointment', 'appointmentdate', 'doctorname', 'costappointment', 'appointmentStatus'],parameters);
-    }
+        return this.daoAppointment.listAppointments(['idAppointment', 'appointmentdate', 'doctorname', 'costappointment', 'appointmentStatus'],parameters);
+    };
 
     executeAgendaList = async (parameters: {}[]) : Promise<{}[]> => {
-        return await this.daoAppointment.listAppointments(['appointmentdate', 'appointmentStatus'],parameters);
-    }
+        return this.daoAppointment.listAppointments(['appointmentdate', 'appointmentStatus'],parameters);
+    };
 }

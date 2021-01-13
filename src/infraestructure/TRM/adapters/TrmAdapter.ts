@@ -22,5 +22,5 @@ export class TrmAdapter implements TrmRepository {
         });
         const value: string = await Xml.Instance().deserializeXml({ xml: resXml });
         return Promise.resolve({message: { trmValue: value }});
-    }
+    };
 }

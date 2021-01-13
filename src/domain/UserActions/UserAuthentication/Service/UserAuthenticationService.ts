@@ -19,5 +19,5 @@ export class UserAuthenticationService {
             code: 'user_authenticated',
             userid: user.userId
         });
-    }
+    };
 }

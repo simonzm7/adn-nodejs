@@ -15,7 +15,7 @@ export class RepositoryUserMysql implements RepositoryUser {
     constructor(@InjectRepository(UserEntity) private readonly userRepository: Repository<UserEntity>,
         private readonly repositoryPayments: RepositoryPayments) { }
 
-    async createOne(user: User) {
+    public async createOne(user: User) {
         await this.userRepository.save({
             email: user.get_email,
             password: user.get_password,
@@ -26,15 +26,16 @@ export class RepositoryUserMysql implements RepositoryUser {
             role: user.get_role
         })
             .then(() => { throw new SuccessExcp({ code: 'user_created' }); });
-    }
+    };
 
-    async updateUser(user: UserEntity, idAppointment?: number) {
+    public async updateUser(user: UserEntity, idAppointment?: number) {
         await this.userRepository.save(user).catch(async () => {
-            if (idAppointment) await this.repositoryPayments.deletePayment(new PaymentModel({
-                idUser: user.userId,
-                idAppointment: idAppointment
-            }));
-    })
-}
-
+            if (idAppointment) {
+                await this.repositoryPayments.deletePayment(new PaymentModel({
+                    idUser: user.userId,
+                    idAppointment: idAppointment
+                }));
+            }
+        })
+    };
 }

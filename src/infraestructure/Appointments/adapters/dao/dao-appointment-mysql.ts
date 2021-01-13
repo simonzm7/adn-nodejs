@@ -10,31 +10,31 @@ export class DaoAppointmentMysql implements DaoAppointment {
 
     constructor(@InjectRepository(AppointmentEntity) private readonly appointmentEntity: Repository<AppointmentEntity>) { }
 
-    listAppointments = async (columns: [], parameters: {}[]): Promise<{}[]> => {
+    public listAppointments = async (columns: [], parameters: {}[]): Promise<{}[]> => {
         return await this.appointmentEntity.find({
             select: columns,
             where: parameters
         });
-    }
+    };
 
-    findAppointmentByIdAndStatus = async (idAppointment: number): Promise<AppointmentEntity> => {
+    public findAppointmentByIdAndStatus = async (idAppointment: number): Promise<AppointmentEntity> => {
         return await this.appointmentEntity.findOne({
             where: {
                 idAppointment,
                 appointmentStatus: 0
             }
         });
-    }
+    };
 
-    findAppointmentByIds = async (idAppointment: number, idUser: number): Promise<AppointmentEntity> => {
+    public findAppointmentByIds = async (idAppointment: number, idUser: number): Promise<AppointmentEntity> => {
         return await this.appointmentEntity.findOne({
             where: [
                 { idAppointment, appointmentStatus: 1, idUser },
                 { idAppointment, appointmentStatus: 0 }
             ]
         });
-    }
-    findAppointmentById = async (idAppointment: number): Promise<AppointmentEntity> => {
+    };
+    public findAppointmentById = async (idAppointment: number): Promise<AppointmentEntity> => {
         return await this.appointmentEntity.findOne({ idAppointment });
-    }
+    };
 }

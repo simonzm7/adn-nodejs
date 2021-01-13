@@ -28,15 +28,15 @@ export class AppointmentService {
         await this.appointmentDBRepository.createAppointment(appointment);
     };
 
-    executeSelector = async (selectorModel: AppointmentSelector) => {
+    executeSelector = async (selector: AppointmentSelector) => {
 
-        await this.userAppointmentValidation.verifyAutoSelect(selectorModel.getUserId, selectorModel.getAppointmentId);
-        await this.dateValidationRepository.verifyIfCustomerHaveAppointment(selectorModel.getUserId, selectorModel.getAppointmentDate);
-        const appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentStatusAndReturn(selectorModel.getAppointmentId);
+        await this.userAppointmentValidation.verifyAutoSelect(selector.getUserId, selector.getAppointmentId);
+        await this.dateValidationRepository.verifyIfCustomerHaveAppointment(selector.getUserId, selector.getAppointmentDate);
+        const appointment: AppointmentEntity = await this.appointmentValidation.verifyAppointmentStatusAndReturn(selector.getAppointmentId);
 
         await this.dateValidationRepository.verifyAppointmentValidDate(appointment.appointmentdate, ActionType.Select);
-        const user: UserEntity = await this.userAppointmentValidation.verifyIfCustomerHaveBalance(selectorModel.getUserId, appointment.costappointment);
-        this.userAppointmentValidation.verifyDNI(user.dni, selectorModel.getWeekDay);
+        const user: UserEntity = await this.userAppointmentValidation.verifyIfCustomerHaveBalance(selector.getUserId, appointment.costappointment);
+        this.userAppointmentValidation.verifyDNI(user.dni, selector.getWeekDay);
         appointment.appointmentStatus = 1;
         appointment.idUser = user.userId;
         await this.appointmentDBRepository.updateAppointment(appointment, ActionType.Take, user);
